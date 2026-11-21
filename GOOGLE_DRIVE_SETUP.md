@@ -1,68 +1,58 @@
-# カード管理 v0.3.1｜Google Drive暗号化バックアップ設定・実機検証
+# カード管理 v0.3.2｜Google Driveアカウント別バックアップ
 
-## 確定した仕様変更
-- カード情報の主保存先は従来どおり端末内IndexedDB（平文・PINは画面制御のみ）。
-- 外部通信は、Google Driveへの**手動バックアップ／復元**操作時のみ許可（Google Identity Services認証 + Google Drive API）。PWAの同一配信元のアプリ資産更新通信は別途発生し得る。
-- Driveへ送るのは **AES-256-GCM / PBKDF2-HMAC-SHA256 600,000回で暗号化したJSONだけ**。PINのハッシュ・Googleアクセストークン・パスフレーズはJSONに含まれない。
-- クラウドへの自動同期、自動バックアップ、Google Drive上の平文JSON、Drive内のファイル自動削除は実装しない。
+## 仕様
 
-## 本人が一度だけ行うGoogle Cloud設定（まだ未実施）
-1. [Google Cloud Console](https://console.cloud.google.com/) で本人管理のプロジェクトを選択または作成。
-2. **Google Drive API**を有効化。
-3. Google Auth Platform（OAuth同意画面）のアプリ名と対象ユーザーを設定。External / テスト運用の場合は本人のGoogleアカウントを**テストユーザー**に追加。個人利用を超える公開はしない。
-4. OAuthクライアントを**ウェブアプリケーション**種別で作成。
-5. 「承認済みのJavaScript生成元」にテスト用 `http://localhost:8765` と `http://localhost` を追加。将来HTTPS配信で使う場合は、そのサイトの正確なオリジン（例：`https://example.com`）も追加する。`file://`、IPの異なるオリジン、任意のPrivate GitHub URLをそのまま登録しても動作しない。
-6. ウェブ用OAuthクライアントIDはアプリに**既定値として設定済み**。普段はアプリでの手入力は不要。別のGoogle Cloudプロジェクトに切り替えるときだけ「設定・データ → Google認証の設定」で変更する。**クライアントシークレットは入力・配置しない**。
+- アプリのOAuthクライアントIDは**アプリ共通**。一般利用者が入力するものではない。クライアントシークレットは使わない。
+- 「暗号化してDriveへ保存」「Driveから復元」のたびに、Googleアカウント選択画面を表示する（Google Identity Services `prompt: select_account`）。
+- 同じアプリでも、利用者AがAアカウントを認証すればAのDrive、BがBアカウントを認証すればBのDriveへアクセスする。アカウント選択は**本人操作**とする。
+- 選択したGoogleアカウントのメールアドレスをGoogle Drive API `about.get` で確認し、**保存直前にメールアドレスを表示して最終確認**する。確認を拒否したら**アップロードしない**。復元一覧・確認にもアカウントを表示する。
+- 権限は `https://www.googleapis.com/auth/drive.file` のみ。Drive全体へのアクセス権限は要求しない。アカウントを識別できない場合は安全停止する。
+- Driveに送るカードデータは従来どおり **PBKDF2-HMAC-SHA256（600,000回）＋AES-256-GCMの暗号化JSON** のみ。アクセストークン・PIN・暗号化パスフレーズはバックアップに含めない。アクセストークンはメモリ内だけで使用する。
+- **Googleアカウントと端末データは別管理**。同じブラウザ・同じオリジンではIndexedDBのカード情報が共有され、Googleアカウントを切り替えてもカード情報が利用者別に自動分離されるわけではない。共用端末ではブラウザプロフィールを分けるか、別端末を使う。
+- クラウドへの自動同期・定期バックアップ・Drive上のファイル自動削除はなし。クラウドへの操作は本人が押したときだけ行う。
 
-クライアントIDは公開識別子としてアプリのHTMLに既定値を同梱し、端末側で別IDを上書き設定した場合のみIndexedDBへ保存する。JSONバックアップには含めない。OAuthアクセストークンは操作中のメモリだけで使用し、永続保存しない。
+## 公開サイトとOAuth設定
 
-**重要：** Google CloudのOAuth設定や実際のアカウント認証はChatGPT側では完了していません。実ブラウザでの本人操作が必要です。Google認証にはHTTPSまたはlocalhostが必要です。Android/iPhoneへPWAとして導入するための**非公開HTTPS配信方法**は未決定です。GitHub Pages公開は行っていません。
+- GitHub Pages: `https://goroyattemiyo.github.io/credit-card-usage-manager/`
+- Google Cloud Consoleの「承認済みのJavaScript生成元」：`https://goroyattemiyo.github.io`（URLのパスは含めない）、ローカルテストでは `http://localhost:8765`。
+- 利用するGoogle Cloudプロジェクトで**Google Drive APIを有効化**し、OAuthクライアント種別を**ウェブ アプリケーション**にする。
+- **複数の一般ユーザーに使ってもらうには、Google Auth Platform → 対象で「External（外部）」を設定し、Googleの公開ステータスを確認すること**。Testing（テスト）では、許可されたテストユーザーしか利用できない。External / In productionの場合も、Google側のブランド認証・公開審査などが求められることがある。これはアプリのコードとは別のGoogle Cloud設定で、現時点で実際のステータスは未確認。
+- クライアントIDの変更画面は一般利用者には不要なためv0.3.2で撤去。以前にローカル保存した別IDも使用せず、アプリ共通IDを使う。
 
-## ローカルでの起動（Windows・Python導入済み）
-ZIP内の `index.html`・`manifest.json`・`sw.js`・`icons/` を同じ階層に展開。
+## 実機テスト手順（最初は架空のカードのみ）
 
-```powershell
-cd <展開したフォルダ>
-py -m http.server 8765 --bind 127.0.0.1
-```
-
-Chromeで `http://localhost:8765/index.html` を開く。ターミナルを閉じると配信は停止する。ブラウザには既存の同一オリジンのIndexedDBが残るため、**テスト専用ブラウザプロフィール／架空データ**を使う。既存データに実データがある場合は最初に暗号化JSONを別途保存する。
-
-## 実機チェック項目
-
-| ID | 確認操作 | 合格条件 |
+| ID | テスト | 合格条件 |
 |---|---|---|
-| U01 | PIN設定、架空カードを登録、画面再読み込み | IndexedDBデータとPINロックが保持される |
-| U02 | ネット切断でアプリを通常操作 | カード一覧・編集は使用可能、Drive操作はエラーになる |
-| U03 | 設定→Google認証設定→既定OAuthクライアントIDを確認 | 既定IDが表示され、シークレット入力欄は存在しない |
-| U04 | 暗号化してDriveへ保存→パスフレーズ入力→準備→Google認証 | GoogleがDriveファイル権限だけを要求。認証拒否時は未送信 |
-| U05 | Driveアップロード完了 | `.json.enc`が**自分のDrive**に作られる。アプリは再取得一致を検証して完了を表示 |
-| U06 | Google Drive内で保存ファイル確認 | 暗号化ヘッダーとciphertextのみ。カード名・番号・PINハッシュは平文で出ない |
-| U07 | Driveから復元→ファイル選択→正しいパスフレーズ→確認 | カード件数プレビュー→最終確認→置換→PIN再設定 |
-| U08 | Drive復元で誤ったパスフレーズ | 復元拒否、端末の既存カードは変更されない |
-| U09 | Google認証拒否、通信遮断、5分ロック | Drive操作は失敗として表示。トークンをIndexedDB/localStorageへ書き込まない |
-| U10 | 同一端末のローカルJSON書き出し・読み込み | 既存ローカルバックアップ機能に回帰がない |
-| U11 | `file://`から開きGoogle Drive操作 | 安全な配信が必要との案内。その他のローカル画面は使える |
-| U12 | PWA更新 | v0.3.1が表示され、Service Workerキャッシュがv0.3.1に更新される |
+| U01 | Google認証設定画面を探す | 存在しない。クライアントIDは入力不要 |
+| U02 | Aで暗号化保存 → アカウント選択 | Aが選べる。保存直前にAのメールアドレスを確認できる |
+| U03 | Aの保存先確認でキャンセル | AのDriveにファイルを作成しない。再度認証できる |
+| U04 | Aで保存を承認 | 暗号化JSONだけがAのDriveに保存され、再取得照合が成功 |
+| U05 | Bで保存 | Bのメールアドレスを表示し、BのDriveにだけ保存される |
+| U06 | Aで復元一覧、次にBで復元一覧 | アカウントごとのファイルだけ表示される。誤ってAのバックアップをBの一覧に出さない |
+| U07 | A/Bそれぞれから復元 | 復元元アカウントを確認でき、復号・検査・最終承認後にだけ端末のデータが置き換わる |
+| U08 | 認証拒否、権限不足、ネットワーク切断、アカウント識別不能 | 保存・復元せずエラー。既存の端末データは保持される |
+| U09 | 画面ロック、認証ポップアップ中断 | 既存のセッションが失われた場合、安全に中止 |
+| U10 | 従来のローカルJSON書き出し・読み込み | 従来どおり動作する |
+| U11 | PWA再読み込み | バージョン0.3.2、Service Workerキャッシュもv0.3.2 |
 
-## 制約・リスク
-- **PINはデータ暗号化ではない。** IndexedDBは平文のまま。Google Driveへ送信するJSONのみ暗号化。
-- **パスフレーズ紛失では復元不可能。** Google側でも復号できない。別途安全に管理する。
-- **Driveで作るファイルは追加保存方式。** 誤アップロードや通信中断後のリトライでは重複に注意する。保存後の再取得・照合に失敗してもアップロード済みの可能性がある。
-- **drive.fileスコープ**では原則として同じOAuthアプリが作成したファイルだけを扱う。他のOAuthクライアントIDを使って作った旧バックアップはアプリ一覧に出ない場合がある。その場合はDriveからファイルを端末にダウンロードして、従来の「JSONを読み込んで復元」を使用する。
-- バックアップ一覧は最新100件まで。追加のページ読み込みは未実装（個人利用MVPの範囲）。
-- Google Cloud同意画面のテストモード・OAuthクライアントIDの設定・Google側の利用制限によって実機認証が失敗する場合がある。
-- 静的HTML配信のため、Google SDKを読み込む際にはGoogleの認証用JavaScriptが通信される。これはGoogle Drive操作開始時のみ遅延ロードする。
+## 注意点
 
-## 未検証と公開判断
-- OAuthのGoogle実アカウントでの認可：**未検証（クライアントIDは設定済み。Google Cloudの許可オリジン・テストユーザー登録および本人操作が必要）**。
-- Google Drive APIの実アップロード／復元：**BLOCKED（実Google認証未実施）**。
-- Android/iOSインストール・非公開HTTPS：**未検証／要判断**。
-- ブラウザE2E：実行環境の管理ポリシーでlocalhostへのChromiumナビゲーション不可。**未検証**。
-- 静的検証・API模擬テスト：レポートの実測件数を参照。
+- 端末内のIndexedDBは**暗号化されない**。4桁PINは画面操作の制限であり、保存データの暗号化ではない。
+- Driveに作成する暗号化バックアップの**パスフレーズを紛失すると復元不能**。
+- 通信失敗時にアップロードが成功済みの可能性があるため、すぐに再送信せずDriveの一覧で重複確認する。
+- アプリが作成したバックアップを扱う `drive.file` なので、別OAuthアプリで作った旧ファイルは表示されない場合がある。
+- Googleが利用者を識別できない状態ではバックアップを実行しない。
+- PWAのアプリ資産更新通信とGoogle認証ライブラリ読み込みは発生し得る。カードデータのGoogle送信はバックアップ操作時のみ。
+
+## 検証状態
+
+- Node.js構文検証：PASS
+- 2つのGoogleアカウントを模擬したアカウント選択・保存／一覧／読取・誤操作／異常系：28項目PASS（実コードの関数を使った模擬テスト）
+- Google実認証・実Drive API操作・2アカウントの実機検証：**未検証**
+- Google Auth PlatformのExternal/Testing/Productionステータス：**未確認**
 
 参考：
-- [Google OAuthクライアントIDの作成](https://developers.google.com/identity/oauth2/web/guides/get-google-api-clientid)
-- [Google Identity Services token model](https://developers.google.com/identity/oauth2/web/guides/use-token-model)
-- [Drive OAuthスコープ](https://developers.google.com/workspace/drive/api/guides/api-specific-auth)
-- [Drive multipart/resumable upload](https://developers.google.com/workspace/drive/api/guides/manage-uploads)
+- [Google Identity Services TokenClient.prompt](https://developers.google.com/identity/oauth2/web/reference/js-reference)
+- [Drive API about.get](https://developers.google.com/workspace/drive/api/reference/rest/v3/about/get)
+- [Drive API権限とdrive.file](https://developers.google.com/workspace/drive/api/guides/api-specific-auth)
+- [OAuthアプリ公開ステータス](https://developers.google.com/identity/protocols/oauth2/production-readiness/overview)
