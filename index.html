@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; object-src 'none'; media-src 'none'; font-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<title>カードの使い方管理</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#17233a;background:#f5f7fc;font-size:15px;line-height:1.55;--navy:#172842;--blue:#315af2;--pale:#edf2ff;--border:#dce3f0;--muted:#65738b;--red:#b72e35;--green:#166a4d}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}button,select,input,textarea{min-height:44px}a{color:var(--blue)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8ea8ff;outline-offset:2px}
+header{background:var(--navy);color:white;position:sticky;top:0;z-index:10;box-shadow:0 3px 12px #0a18341a}header .head-inner{max-width:1050px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;gap:10px}header h1{font-size:1.07rem;letter-spacing:.01em;margin:0}header small{display:block;color:#c5d0ec;font-size:.73rem;font-weight:400}main{max-width:1050px;margin:auto;padding:22px 16px 125px}.page-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}.page-head h2{font-size:1.4rem;margin:0}.sub{color:var(--muted);font-size:.89rem}.section-title{font-size:1.07rem;margin:26px 0 12px}.empty{border:1px dashed #becbe0;border-radius:15px;padding:22px;text-align:center;color:var(--muted);background:white}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #cbd5e6;border-radius:11px;background:white;color:var(--navy);padding:10px 15px;font-weight:650;min-height:44px;text-decoration:none}.btn.primary{background:var(--blue);color:white;border-color:var(--blue)}.btn.danger{color:var(--red);border-color:#efbfc4}.btn.ghost{background:transparent;color:inherit;border-color:#9eacc5}.btn.small{min-height:38px;padding:6px 10px;font-size:.86rem}.btn.full{width:100%}.btn-row{display:flex;flex-wrap:wrap;gap:9px}.btn-row.end{justify-content:flex-end}.stack{display:grid;gap:13px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.panel{border:1px solid var(--border);background:white;border-radius:15px;padding:18px;box-shadow:0 2px 8px #22315308}.tile{border:1px solid var(--border);background:white;border-radius:15px;padding:16px}.stat-label{color:var(--muted);font-size:.84rem}.stat-num{font-size:1.75rem;font-weight:800;letter-spacing:-.035em}.warning{padding:13px 15px;background:#fff8e5;border:1px solid #f1d59c;color:#674813;border-radius:12px}.info{padding:13px 15px;background:#eef4ff;border:1px solid #c3d4ff;border-radius:12px}.error{padding:13px 15px;background:#fff1f2;border:1px solid #f5c5cb;border-radius:12px;color:#9b252e}.fine{font-size:.81rem;color:var(--muted)}.pill{display:inline-block;font-size:.72rem;border-radius:100px;border:1px solid #d2dbec;padding:2px 8px;white-space:nowrap;background:#f8faff;color:#3e4c65}.pill.warn{background:#fff7e9;border-color:#f1d3a5;color:#865515}.pill.red{background:#fff0f0;border-color:#f6d1d1;color:#a22d31}.pill.green{background:#eaf9f0;border-color:#b6ddc4;color:#1d704a}
+.cards{display:grid;gap:10px}.card-line{display:flex;gap:11px;align-items:center;justify-content:space-between;border:1px solid var(--border);background:white;border-radius:14px;padding:13px 15px}.card-main{display:flex;gap:11px;align-items:center;min-width:0;flex:1}.swatch{width:42px;height:29px;flex:0 0 auto;border-radius:7px;border:1px solid #7b889c55;box-shadow:0 1px 3px #0002}.card-name{font-weight:760;overflow-wrap:anywhere}.card-extra{font-size:.81rem;color:var(--muted)}.card-line .btn{flex:0 0 auto}.alerts{display:grid;gap:9px}.alert-item{border-left:4px solid #df9427;padding:12px 15px;background:#fffaf0;border-radius:9px}.alert-item.urgent{border-left-color:#ca4047;background:#fff4f5}.alert-item button{margin-top:6px}.filters{display:grid;grid-template-columns:2fr repeat(4,minmax(0,1fr));gap:9px}.filters input,.filters select{width:100%}
+.field{display:grid;gap:5px;min-width:0}.field label,.field .label{font-size:.86rem;font-weight:680}.field input,.field select,.field textarea{border:1px solid #becadd;background:white;border-radius:10px;padding:8px 10px;width:100%;color:var(--navy)}.field textarea{resize:vertical;min-height:85px}.field input[type=checkbox]{width:18px;height:18px;min-height:auto;accent-color:var(--blue)}.field .help{color:var(--muted);font-size:.76rem}.check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 13px}.check-grid label{display:flex;gap:8px;align-items:center;font-weight:500;font-size:.86rem}.check-grid input{flex:0 0 18px}.form-section{border:1px solid var(--border);border-radius:13px;background:#fcfdff;padding:13px 15px;margin:11px 0}.form-section summary{font-weight:750;cursor:pointer;padding:4px 0}.form-content{display:grid;gap:12px;padding-top:15px}.data-list{margin:0;display:grid;grid-template-columns:135px 1fr;gap:8px 13px}.data-list dt{color:var(--muted);font-size:.85rem}.data-list dd{margin:0;overflow-wrap:anywhere}.divider{height:1px;background:var(--border);margin:17px 0}.row-between{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.service-row{display:flex;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding:12px 0}.service-row:first-child{border-top:0}.compact-list{margin:8px 0;padding-left:20px}.muted{color:var(--muted)}.color-grid{display:flex;gap:8px;flex-wrap:wrap}.color-choice{display:flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:8px;padding:3px 8px}.color-choice input{min-height:18px;width:18px}.color-dot{display:inline-block;width:23px;height:18px;border-radius:5px;border:1px solid #73809a66}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:12;display:flex;justify-content:center;box-shadow:0 -5px 18px #202a3d10;padding-bottom:env(safe-area-inset-bottom)}.bottom-nav button{min-width:0;flex:1;max-width:190px;border:none;background:none;font-size:.8rem;color:var(--muted);height:63px;padding:6px 4px;display:grid;place-content:center;gap:1px}.bottom-nav button .symbol{font-size:1.19rem}.bottom-nav button.active{color:var(--blue);font-weight:800;border-top:3px solid var(--blue)}
+#lock-screen{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(150deg,#dce7ff,#f6f8fd 55%,#ecf4ff)}.lock-box{max-width:430px;width:100%;padding:29px;background:white;border:1px solid var(--border);border-radius:19px;box-shadow:0 18px 48px #1b326624}.lock-box h1{font-size:1.5rem;margin:0 0 4px}.lock-box form{display:grid;gap:13px}.lock-box input{font-size:1.25rem;letter-spacing:.3em;text-align:center}.lock-box .warning{font-size:.84rem}
+#modal-root{position:fixed;inset:0;z-index:30;display:none;overflow:auto;background:#14203bb5;padding:12px;align-items:flex-start;justify-content:center}#modal-root.open{display:flex}.modal{position:relative;background:white;border-radius:17px;max-width:750px;width:100%;margin:24px 0 45px;box-shadow:0 22px 70px #07193460;padding:18px 20px 23px}.modal h2{font-size:1.23rem;margin:0}.modal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.modal-body{max-height:none}.modal-close{background:transparent;border:none;font-size:1.5rem;min-height:40px;width:42px;color:var(--muted)}.modal .form-actions{position:sticky;bottom:-23px;background:white;border-top:1px solid var(--border);padding:12px 0 8px;margin-top:16px;z-index:3}.toast{position:fixed;z-index:50;right:18px;top:75px;max-width:min(460px,calc(100% - 36px));background:#172842;color:white;border-radius:11px;padding:12px 16px;box-shadow:0 6px 25px #0003;display:none}.toast.visible{display:block}.chipline{display:flex;flex-wrap:wrap;gap:5px}.split{display:grid;grid-template-columns:1.5fr 1fr;gap:15px}.section-sub{font-size:.83rem;color:var(--muted);margin-top:0}.hidden{display:none!important}footer{max-width:1050px;margin:-75px auto 95px;padding:10px 16px;color:#65738b;font-size:.76rem}
+@media(max-width:800px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.filters input{grid-column:1/-1}.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}
+@media(max-width:550px){main{padding:15px 11px 112px}.grid2,.grid3{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tile{padding:12px}.stat-num{font-size:1.44rem}.modal{padding:13px 13px 20px;margin:5px 0 22px}.modal .form-actions{bottom:-20px}.data-list{grid-template-columns:100px 1fr}.btn{padding:9px 11px}.card-line{padding:12px}.check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}header .head-inner{padding:8px 12px}.bottom-nav button{height:59px;font-size:.72rem}}
+</style>
+</head>
+<body>
+<div id="lock-screen" hidden></div>
+<div id="app" hidden>
+<header><div class="head-inner"><h1>▣ カードの使い方管理 <small>この端末内だけで記録 · オフライン専用</small></h1><button class="btn ghost small" id="manual-lock" type="button">🔒 ロック</button></div></header>
+<main id="main"></main>
+<nav class="bottom-nav" id="bottom-nav" aria-label="主な画面"></nav>
+<footer>PINは画面表示の制御のみです。IndexedDB内のデータは暗号化されません。保存先の端末とバックアップを適切に管理してください。</footer>
+</div>
+<div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+/* Card Usage Manager / Gate 1 MVP / v0.1.0. No network code or external dependencies. */
+const APP_VERSION = '0.1.0', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
+const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
+const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
+const FEES = { unknown: '未設定', free: '無料', paid: '有料', conditional_free: '条件付き無料' };
+const TAGS = { main: 'メイン決済', online: 'ネット通販', subscription: 'サブスク', utility: '公共料金', travel: '旅行', work: '仕事用', other: 'その他' };
+const DIG = { apple_pay: 'Apple Pay', google_pay: 'Google Pay', paypay: 'PayPay', rakuten_pay: '楽天ペイ', d_barai: 'd払い', au_pay: 'au PAY', line_pay: 'LINE Pay', other: 'その他' };
+const SERVICE_CATEGORIES = { subscription: 'サブスク', utility: '公共料金', shopping: 'ネット通販', other: 'その他' };
+const MIG_STATES = { pending: '未確認', verified_moved: '移行確認済み', not_needed: '移行不要' };
+const COLORS = { navy: ['ネイビー', '#263959'], black: ['ブラック', '#252932'], white: ['ホワイト', '#f9fafb'], silver: ['シルバー', '#adb9c6'], gold: ['ゴールド', '#d6af52'], blue: ['ブルー', '#4775d6'], red: ['レッド', '#c34f5b'], green: ['グリーン', '#32896f'], purple: ['パープル', '#8c63ae'], pink: ['ピンク', '#e3a0b9'] };
+const DEFAULT_LOCATIONS = ['普段の財布', 'サブ財布', '家の金庫', '引き出し', 'その他'];
+const CARD_KEYS = ['id', 'name', 'issuer', 'brand', 'last4', 'color', 'expiry', 'locationId', 'digitalRegistrations', 'status', 'usageTags', 'annualFeeType', 'annualFeeYen', 'annualFeeMonth', 'feeConditionUnmet', 'closingDay', 'debitDay', 'debitBankName', 'pointProgram', 'pointExpiryMemo', 'lastUsedOn', 'canceledOn', 'memo', 'createdAt', 'updatedAt'];
+const LOCATION_KEYS = ['id', 'name', 'sortOrder'];
+const SERVICE_KEYS = ['id', 'name', 'category', 'monthlyEstimateYen', 'currentCardId', 'createdAt', 'updatedAt'];
+const MIGRATION_KEYS = ['id', 'sourceCardId', 'serviceId', 'serviceName', 'state', 'destinationCardId', 'movedOn', 'confirmedOn', 'createdAt', 'updatedAt'];
+const TRANSFER_KEYS = ['id', 'serviceId', 'serviceName', 'sourceCardId', 'destinationCardId', 'movedOn', 'createdAt'];
+let db = null, dataset = null, pinState = null, unlocked = false, currentView = 'home', selectedCard = null, lastActivity = 0, inactivityTimer = null, lockTicker = null, toastTimer = null, isBusy = false, sessionToken = 0;
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const main = $('#main'), app = $('#app'), lockScreen = $('#lock-screen'), modalRoot = $('#modal-root');
+function h(tag, attrs = {}, ...kids) { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined)
+        continue;
+    if (k === 'class')
+        n.className = v;
+    else if (k === 'text')
+        n.textContent = String(v);
+    else if (k === 'htmlFor')
+        n.htmlFor = v;
+    else if (k === 'value')
+        n.value = v;
+    else if (k === 'checked')
+        n.checked = !!v;
+    else if (k === 'disabled')
+        n.disabled = !!v;
+    else if (k === 'onclick')
+        n.addEventListener('click', v);
+    else if (k === 'onchange')
+        n.addEventListener('change', v);
+    else if (k === 'oninput')
+        n.addEventListener('input', v);
+    else if (k === 'type')
+        n.type = v;
+    else if (k === 'name')
+        n.name = v;
+    else if (k === 'placeholder')
+        n.placeholder = v;
+    else if (k === 'required')
+        n.required = !!v;
+    else if (k === 'min')
+        n.min = v;
+    else if (k === 'max')
+        n.max = v;
+    else if (k === 'maxLength')
+        n.maxLength = v;
+    else if (k === 'inputMode')
+        n.inputMode = v;
+    else if (k === 'autocomplete')
+        n.autocomplete = v;
+    else if (k === 'rows')
+        n.rows = v;
+    else if (k === 'title')
+        n.title = v;
+    else if (k === 'id')
+        n.id = v;
+    else if (k === 'multiple')
+        n.multiple = !!v;
+    else
+        n.setAttribute(k, String(v));
+} for (const c of kids.flat(Infinity)) {
+    if (c === null || c === undefined || c === false)
+        continue;
+    n.append(c instanceof Node ? c : document.createTextNode(String(c)));
+} return n; }
+const btn = (s, fn, style = '') => h('button', { type: 'button', class: 'btn ' + style, onclick: fn, text: s });
+const uuid = () => crypto.randomUUID();
+const textOr = (v, f = '未設定') => v === null || v === undefined || v === '' ? f : String(v);
+const money = v => v === null || v === undefined ? '不明' : Number(v).toLocaleString('ja-JP') + '円';
+const ts = () => new Date().toISOString();
+function jstParts(d = new Date()) { const a = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(d); return Object.fromEntries(a.filter(x => x.type !== 'literal').map(x => [x.type, x.value])); }
+function jstToday() { const p = jstParts(); return `${p.year}-${p.month}-${p.day}`; }
+function stampFile() { const p = jstParts(); return `${p.year}${p.month}${p.day}-${p.hour}${p.minute}${p.second}`; }
+function parseDate(s) { return new Date(s + 'T00:00:00Z'); }
+function subtractMonths(ymd, n) { const [y, m, d] = ymd.split('-').map(Number); const target = new Date(Date.UTC(y, m - 1 - n, 1)); const last = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate(); target.setUTCDate(Math.min(d, last)); return target.toISOString().slice(0, 10); }
+function monthsBetween(fromYM, toYM) { const [y1, m1] = fromYM.split('-').map(Number), [y2, m2] = toYM.split('-').map(Number); return (y2 - y1) * 12 + m2 - m1; }
+function isStale(c) { return c.status !== 'canceled' && !!c.lastUsedOn && c.lastUsedOn <= subtractMonths(jstToday(), 6); }
+function feeApplies(c) { return c.annualFeeType === 'paid' || (c.annualFeeType === 'conditional_free' && c.feeConditionUnmet === true); }
+function cancelCandidate(c) { return isStale(c) && feeApplies(c); }
+function dateFmt(v) { return v || '不明'; }
+function ymFmt(v) { return v ? v.replace(/^([0-9]{4})-([0-9]{2})$/, '$1年$2月') : '未設定'; }
+function dayFmt(v) { return v === 'eom' ? '末日' : v ? `${v}日` : '未設定'; }
+function toast(s) { const n = $('#toast'); n.textContent = s; n.classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => n.classList.remove('visible'), 4200); }
+function fail(e, context = '操作') { console.error(context, 'error type:', e && e.name || 'Error'); const message = e && e.code === 'STALE' ? '別の画面でデータが更新されています。ページを再読み込みしてから操作してください。' : e && e.message ? e.message : '原因不明のエラーです'; alert(`${context}できませんでした。\n${message}`); }
+function newDataset() { return { schemaVersion: SCHEMA, revision: 0, locations: DEFAULT_LOCATIONS.map((name, i) => ({ id: uuid(), name, sortOrder: i })), cards: [], services: [], migrationChecks: [], transfers: [] }; }
+function reqToPromise(r) { return new Promise((resolve, reject) => { r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error || new Error('DBリクエスト失敗')); }); }
+function openDb() { return new Promise((resolve, reject) => { const r = indexedDB.open(DB_NAME, 1); r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains(DB_STORE))
+    r.result.createObjectStore(DB_STORE); }; r.onsuccess = () => { const d = r.result; d.onversionchange = () => { d.close(); if (unlocked) {
+    lock('データベースが別画面で変更されました');
+} alert('別の画面でデータベースが変更されました。再読み込みしてください。'); }; resolve(d); }; r.onerror = () => reject(r.error || new Error('IndexedDBを開けません')); r.onblocked = () => reject(new Error('別タブでデータベースが使用中です')); }); }
+function getKV(key) { return new Promise((resolve, reject) => { let tx; try {
+    tx = db.transaction(DB_STORE, 'readonly');
+}
+catch (e) {
+    return reject(e);
+} const req = tx.objectStore(DB_STORE).get(key); req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); }); }
+function putKV(key, value) { return new Promise((resolve, reject) => { const tx = db.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put(value, key); tx.oncomplete = resolve; tx.onerror = () => reject(tx.error || new Error('保存失敗')); tx.onabort = () => reject(tx.error || new Error('保存中止')); }); }
+async function storageCheck() { const k = '__diagnostic__'; await putKV(k, { ok: 1 }); const v = await getKV(k); if (!v || v.ok !== 1)
+    throw new Error('IndexedDBで再読み取りができません'); await new Promise((res, rej) => { const t = db.transaction(DB_STORE, 'readwrite'); t.objectStore(DB_STORE).delete(k); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+function requireAllowed(obj, keys, path) { if (!obj || typeof obj !== 'object' || Array.isArray(obj))
+    throw new Error(`${path}はオブジェクト形式が必要です`); const unwanted = Object.keys(obj).filter(k => !keys.includes(k)); if (unwanted.length)
+    throw new Error(`${path}に未定義の項目があります: ${unwanted.slice(0, 3).join(', ')}`); for (const k of keys)
+    if (!Object.hasOwn(obj, k))
+        throw new Error(`${path}.${k} がありません`); }
+const assert = (condition, msg) => { if (!condition)
+    throw new Error(msg); };
+const isUUID = s => typeof s === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+const nullableText = (v, max) => v === null || (typeof v === 'string' && v.length <= max);
+const neededText = (v, max) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
+const nullableEnum = (v, options) => v === null || (typeof v === 'string' && Object.hasOwn(options, v));
+const isISO = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(s) && !Number.isNaN(Date.parse(s));
+const isDate = s => { if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s))
+    return false; const t = parseDate(s); return !Number.isNaN(t.getTime()) && t.toISOString().slice(0, 10) === s; };
+const isYM = s => typeof s === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(s);
+const dateOrNull = v => v === null || isDate(v);
+const intOrNull = (v, low, high) => v === null || (Number.isInteger(v) && v >= low && v <= high);
+function validTags(v, choices, p) { assert(Array.isArray(v) && v.length <= Object.keys(choices).length, `${p}が不正です`); assert(v.every(x => Object.hasOwn(choices, x)) && new Set(v).size === v.length, `${p}に不正値・重複があります`); }
+function validDataset(x) {
+    requireAllowed(x, ['schemaVersion', 'revision', 'locations', 'cards', 'services', 'migrationChecks', 'transfers'], 'データ');
+    assert(x.schemaVersion === SCHEMA, '未対応のデータバージョンです');
+    assert(Number.isSafeInteger(x.revision) && x.revision >= 0, 'データrevisionが不正です');
+    for (const [k, max] of [['locations', 200], ['cards', 2000], ['services', 5000], ['migrationChecks', 30000], ['transfers', 30000]])
+        assert(Array.isArray(x[k]) && x[k].length <= max, `${k}件数が上限を超えています`);
+    const idSets = {};
+    for (const collection of ['locations', 'cards', 'services', 'migrationChecks', 'transfers']) {
+        const ids = new Set();
+        for (const e of x[collection]) {
+            assert(isUUID(e && e.id), `${collection}に不正IDがあります`);
+            assert(!ids.has(e.id), `${collection}のIDが重複しています`);
+            ids.add(e.id);
+        }
+        idSets[collection] = ids;
+    }
+    const names = new Set();
+    for (const l of x.locations) {
+        requireAllowed(l, LOCATION_KEYS, '保管場所');
+        assert(neededText(l.name, 40), '保管場所名は1〜40文字です');
+        assert(Number.isSafeInteger(l.sortOrder) && l.sortOrder >= 0, '場所の表示順が不正です');
+        const nk = l.name.normalize('NFKC').trim().toLowerCase();
+        assert(!names.has(nk), '保管場所名が重複しています');
+        names.add(nk);
+    }
+    for (const c of x.cards) {
+        requireAllowed(c, CARD_KEYS, 'カード');
+        assert(neededText(c.name, 80), 'カード名は1〜80文字です');
+        assert(neededText(c.issuer, 80), '発行会社は必須で80文字以内です');
+        assert(nullableEnum(c.brand, BRAND), '国際ブランドが不正です');
+        assert(c.last4 === null || (typeof c.last4 === 'string' && /^\d{4}$/.test(c.last4)), 'カード番号は下4桁のみ入力できます');
+        assert(nullableEnum(c.color, COLORS), 'カード色が不正です');
+        assert(c.expiry === null || isYM(c.expiry), '有効期限は年/月形式です');
+        assert(idSets.locations.has(c.locationId), 'カードには有効な保管場所が必要です');
+        validTags(c.digitalRegistrations, DIG, 'デジタル登録');
+        assert(Object.hasOwn(STATUS, c.status), 'カードの状態が不正です');
+        validTags(c.usageTags, TAGS, '用途タグ');
+        assert(Object.hasOwn(FEES, c.annualFeeType), '年会費区分が不正です');
+        assert(intOrNull(c.annualFeeYen, 0, 100000000), '年会費が不正です');
+        assert(intOrNull(c.annualFeeMonth, 1, 12), '年会費請求月が不正です');
+        assert(typeof c.feeConditionUnmet === 'boolean', '条件付き年会費の状態が不正です');
+        assert(c.annualFeeType !== 'free' || c.annualFeeYen === 0, '無料カードの年会費は0円です');
+        assert(c.annualFeeType !== 'paid' || c.annualFeeYen === null || c.annualFeeYen > 0, '有料カードの年会費は正の金額です');
+        assert(c.closingDay === null || c.closingDay === 'eom' || intOrNull(c.closingDay, 1, 31), '締め日が不正です');
+        assert(c.debitDay === null || c.debitDay === 'eom' || intOrNull(c.debitDay, 1, 31), '引落日が不正です');
+        assert(nullableText(c.debitBankName, 80), '銀行名は80文字以内です');
+        assert(nullableText(c.pointProgram, 80), 'ポイント名は80文字以内です');
+        assert(nullableText(c.pointExpiryMemo, 500), 'ポイントメモは500文字以内です');
+        assert(dateOrNull(c.lastUsedOn), '最終使用日が不正です');
+        assert(dateOrNull(c.canceledOn), '解約日が不正です');
+        assert(nullableText(c.memo, 1000), 'メモは1000文字以内です');
+        assert(isISO(c.createdAt) && isISO(c.updatedAt), 'カード作成・更新日時が不正です');
+    }
+    for (const s of x.services) {
+        requireAllowed(s, SERVICE_KEYS, 'サービス');
+        assert(neededText(s.name, 100), 'サービス名は1〜100文字です');
+        assert(nullableEnum(s.category, SERVICE_CATEGORIES), 'サービス区分が不正です');
+        assert(intOrNull(s.monthlyEstimateYen, 0, 100000000), '月額目安が不正です');
+        assert(s.currentCardId === null || idSets.cards.has(s.currentCardId), 'サービスの支払カードが不正です');
+        assert(isISO(s.createdAt) && isISO(s.updatedAt), 'サービス更新日時が不正です');
+    }
+    for (const m of x.migrationChecks) {
+        requireAllowed(m, MIGRATION_KEYS, '移行チェック');
+        assert(idSets.cards.has(m.sourceCardId), '移行元カードが見つかりません');
+        assert(isUUID(m.serviceId), '移行対象サービスIDが不正です');
+        assert(neededText(m.serviceName, 100), '移行対象のサービス名が不正です');
+        assert(Object.hasOwn(MIG_STATES, m.state), '移行状態が不正です');
+        assert(m.destinationCardId === null || idSets.cards.has(m.destinationCardId), '移行先カードが見つかりません');
+        assert(!m.destinationCardId || m.destinationCardId !== m.sourceCardId, '移行元と移行先が同一です');
+        assert(dateOrNull(m.movedOn) && dateOrNull(m.confirmedOn), '移行日が不正です');
+        assert(m.state === 'pending' ? m.confirmedOn === null : m.confirmedOn !== null, '移行確認日と状態が一致しません');
+        assert(isISO(m.createdAt) && isISO(m.updatedAt), '移行更新日時が不正です');
+    }
+    for (const t of x.transfers) {
+        requireAllowed(t, TRANSFER_KEYS, '移行履歴');
+        assert(isUUID(t.serviceId), '移行履歴のサービスIDが不正です');
+        assert(neededText(t.serviceName, 100), '移行履歴のサービス名が不正です');
+        assert(idSets.cards.has(t.sourceCardId), '履歴の移行元カードが見つかりません');
+        assert(t.destinationCardId === null || idSets.cards.has(t.destinationCardId), '履歴の移行先カードが見つかりません');
+        assert(t.sourceCardId !== t.destinationCardId, '履歴の移行先が同一です');
+        assert(isDate(t.movedOn), '履歴の移行日が不正です');
+        assert(isISO(t.createdAt), '履歴作成日時が不正です');
+    }
+    return true;
+}
+function riskyNumbers(datasetToScan) {
+    const result = [];
+    function check(label, v) { if (typeof v !== 'string')
+        return; const normalized = v.normalize('NFKC'); if (/(?:\d[\s\-‐‑‒–—―]*){12,}/u.test(normalized))
+        result.push(label); }
+    for (const c of datasetToScan.cards) {
+        for (const k of ['name', 'issuer', 'debitBankName', 'pointProgram', 'pointExpiryMemo', 'memo'])
+            check('カード: ' + k, c[k]);
+    }
+    for (const l of datasetToScan.locations)
+        check('保管場所名', l.name);
+    for (const s of datasetToScan.services)
+        check('サービス名', s.name);
+    for (const m of datasetToScan.migrationChecks)
+        check('移行履歴のサービス名', m.serviceName);
+    for (const t of datasetToScan.transfers)
+        check('移行履歴のサービス名', t.serviceName);
+    return [...new Set(result)];
+}
+function confirmRisk(d) { const warnings = riskyNumbers(d); if (!warnings.length)
+    return true; return confirm(`12桁以上の数字列らしき内容を検出しました（${warnings.slice(0, 6).join('、')}）。\nフルカード番号・CVV・カード暗証番号・口座番号は保存禁止です。\n内容を確認し、禁止情報が含まれないと判断した場合だけ続行してください。\n\n保存を続けますか？`); }
+function commitDataset(next, clearPin = false) { return new Promise((resolve, reject) => { let tx; try {
+    tx = db.transaction(DB_STORE, 'readwrite');
+}
+catch (e) {
+    return reject(e);
+} const store = tx.objectStore(DB_STORE), r = store.get('dataset'); let problem = null; r.onsuccess = () => { const current = r.result; if (!unlocked) {
+    problem = new Error('画面がロックされたため保存を中止しました');
+    tx.abort();
+    return;
+} if (!current || current.revision !== dataset.revision) {
+    problem = new Error('別タブまたは他の画面で更新がありました');
+    problem.code = 'STALE';
+    tx.abort();
+    return;
+} next.revision = current.revision + 1; try {
+    validDataset(next);
+}
+catch (e) {
+    problem = e;
+    tx.abort();
+    return;
+} store.put(next, 'dataset'); if (clearPin)
+    store.delete('pin'); }; r.onerror = () => { problem = r.error; }; tx.oncomplete = () => { dataset = next; if (clearPin)
+    pinState = null; resolve(); }; tx.onerror = () => reject(problem || tx.error || new Error('保存できませんでした')); tx.onabort = () => reject(problem || tx.error || new Error('書き込みを取り消しました')); }); }
+async function mutate(fn, opts = {}) { assert(unlocked, 'PIN解除が必要です'); const epoch = sessionToken; const draft = structuredClone(dataset); fn(draft); if (!opts.skipRisk && !confirmRisk(draft))
+    return false; assert(unlocked && epoch === sessionToken, 'ロック中のため保存を中止しました'); await commitDataset(draft); return true; }
+function b64(bytes) { let s = ''; const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes); for (let i = 0; i < b.length; i += 8192)
+    s += String.fromCharCode(...b.subarray(i, i + 8192)); return btoa(s); }
+function fromB64(s) { assert(typeof s === 'string' && s.length > 0 && s.length < MAX_FILE_SIZE * 2 && /^[A-Za-z0-9+/]+={0,2}$/.test(s), 'Base64データが不正です'); const str = atob(s); return Uint8Array.from(str, c => c.charCodeAt(0)); }
+const rand = n => crypto.getRandomValues(new Uint8Array(n));
+async function kdf(pass, salt, iterations, algo) { const b = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey', 'deriveBits']); if (algo === 'AES')
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations }, b, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); return crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations }, b, 256); }
+function protectedHead(o) { return { format: o.format, formatVersion: o.formatVersion, kdf: o.kdf, iterations: o.iterations, cipher: o.cipher, salt: o.salt, iv: o.iv }; }
+async function encryptedBackup(payload, pass) { assert(pass.length >= 12, 'バックアップ用パスフレーズは12文字以上にしてください'); assert(pass.length <= 256, 'パスフレーズが長すぎます'); const head = { format: ENC_FORMAT, formatVersion: 1, kdf: 'PBKDF2-HMAC-SHA256', iterations: KDF_ITERATIONS, cipher: 'AES-256-GCM', salt: b64(rand(16)), iv: b64(rand(12)) }; const key = await kdf(pass, fromB64(head.salt), head.iterations, 'AES'); const extra = new TextEncoder().encode(JSON.stringify(head)); const bytes = new TextEncoder().encode(JSON.stringify(payload)); const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: fromB64(head.iv), additionalData: extra, tagLength: 128 }, key, bytes); return { ...head, ciphertext: b64(cipher) }; }
+async function decryptBackup(obj, pass) { requireAllowed(obj, ['format', 'formatVersion', 'kdf', 'iterations', 'cipher', 'salt', 'iv', 'ciphertext'], '暗号化バックアップ'); assert(obj.format === ENC_FORMAT && obj.formatVersion === 1, '暗号化ファイルの形式が不正です'); assert(obj.kdf === 'PBKDF2-HMAC-SHA256' && obj.iterations === KDF_ITERATIONS && obj.cipher === 'AES-256-GCM', '未対応の暗号形式です'); const salt = fromB64(obj.salt), iv = fromB64(obj.iv), ct = fromB64(obj.ciphertext); assert(salt.length === 16 && iv.length === 12 && ct.length > 16, '暗号パラメータが不正です'); const key = await kdf(pass, salt, obj.iterations, 'AES'); let clear; try {
+    clear = await crypto.subtle.decrypt({ name: 'AES-GCM', iv, additionalData: new TextEncoder().encode(JSON.stringify(protectedHead(obj))), tagLength: 128 }, key, ct);
+}
+catch (e) {
+    throw new Error('パスフレーズが異なるか、暗号化ファイルが破損・改ざんされています');
+} try {
+    return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(clear));
+}
+catch (e) {
+    throw new Error('復号後のJSONが不正です');
+} }
+function validatePayload(payload) { requireAllowed(payload, ['payloadVersion', 'exportedAt', 'dataset'], 'バックアップ内容'); assert(payload.payloadVersion === 1 && isISO(payload.exportedAt), 'バックアップの版・日時が不正です'); validDataset(payload.dataset); return payload.dataset; }
+function dataPayload() { validDataset(dataset); return { payloadVersion: 1, exportedAt: ts(), dataset: structuredClone(dataset) }; }
+function downloadJSON(content, filename) { const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = h('a', { href: url, download: filename }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 120000); }
+async function exportEncrypted(pass, again) { const epoch = sessionToken; assert(unlocked, 'PIN解除が必要です'); assert(pass === again, 'パスフレーズの確認入力が一致しません'); const payload = dataPayload(); assert(confirmRisk(payload.dataset), '番号の確認を中断しました'); const enc = await encryptedBackup(payload, pass); const verify = await decryptBackup(enc, pass); assert(JSON.stringify(payload) === JSON.stringify(verify), '暗号化ファイルの自己復号検証が一致しません'); assert(unlocked && sessionToken === epoch, 'ロックされたため書き出しを中止しました'); downloadJSON(enc, `credit-cards-backup-${stampFile()}.json.enc`); }
+function exportPlain() { const payload = dataPayload(); if (!confirmRisk(payload.dataset))
+    return false; if (!confirm('警告: 平文JSONにはカード名・保管場所・利用サービスなどが暗号化されず保存されます。端末内の安全な保存先を確認してください。\n\nそれでも平文JSONを作成しますか？'))
+    return false; downloadJSON({ format: PLAIN_FORMAT, formatVersion: 1, ...payload }, `credit-cards-backup-${stampFile()}.json`); return true; }
+async function restoreDataset(obj) { assert(unlocked, 'PIN解除が必要です'); const epoch = sessionToken; const txPromise = new Promise((resolve, reject) => { let tx; try {
+    tx = db.transaction(DB_STORE, 'readwrite');
+}
+catch (e) {
+    return reject(e);
+} const store = tx.objectStore(DB_STORE), r = store.get('dataset'); let problem = null, next = structuredClone(obj); r.onsuccess = () => { const existing = r.result; if (!unlocked || sessionToken !== epoch) {
+    problem = new Error('ロックされたため復元を中止しました');
+    tx.abort();
+    return;
+} if (!existing || existing.revision !== dataset.revision) {
+    problem = new Error('別画面で更新されました。復元を中断します');
+    problem.code = 'STALE';
+    tx.abort();
+    return;
+} next.revision = existing.revision + 1; try {
+    validDataset(next);
+}
+catch (e) {
+    problem = e;
+    tx.abort();
+    return;
+} store.put(next, 'dataset'); store.delete('pin'); }; r.onerror = () => { problem = r.error; }; tx.oncomplete = () => { dataset = next; pinState = null; resolve(); }; tx.onabort = () => reject(problem || tx.error || new Error('復元の保存を中止しました')); tx.onerror = () => reject(problem || tx.error || new Error('復元できません')); }); await txPromise; lock('バックアップから復元しました。新しいPINを設定してください'); }
+function pinHash(pin, salt, iterations = PIN_ITERATIONS) { return kdf(pin, salt, iterations, 'bits').then(bits => new Uint8Array(bits)); }
+function equalBytes(a, b) { if (a.length !== b.length)
+    return false; let diff = 0; for (let i = 0; i < a.length; i++)
+    diff |= a[i] ^ b[i]; return diff === 0; }
+async function setPin(pin) { assert(/^\d{4}$/.test(pin), 'PINは半角数字4桁で入力してください'); const salt = rand(16), hash = await pinHash(pin, salt); const rec = { formatVersion: 1, salt: b64(salt), hash: b64(hash), iterations: PIN_ITERATIONS, failedAttempts: 0, lockUntil: 0 }; await putKV('pin', rec); pinState = rec; }
+async function verifyPin(pin) { const p = await getKV('pin'); assert(p && p.formatVersion === 1 && p.iterations === PIN_ITERATIONS, 'PIN設定が不明です'); pinState = p; const now = Date.now(); if (now < p.lockUntil)
+    throw new Error(`PINは一時停止中です。残り${Math.ceil((p.lockUntil - now) / 1000)}秒`); const tryBytes = await pinHash(pin, fromB64(p.salt), p.iterations); const ok = equalBytes(tryBytes, fromB64(p.hash)); p.failedAttempts = ok ? 0 : (p.lockUntil > 0 && now >= p.lockUntil ? 1 : p.failedAttempts + 1); p.lockUntil = ok ? 0 : p.failedAttempts >= 5 ? now + 30000 : 0; if (!ok && p.failedAttempts >= 5)
+    p.failedAttempts = 0; await putKV('pin', p); pinState = p; if (!ok)
+    throw new Error(p.lockUntil > now ? '5回失敗したため30秒間ロックします' : `PINが違います（5回で30秒間ロック）`); return true; }
+function dangerMsg(text) { return h('div', { class: 'warning', text }); }
+function heading(title, action) { return h('div', { class: 'page-head' }, h('h2', { text: title }), action || null); }
+function stat(label, value, detail) { return h('div', { class: 'tile' }, h('div', { class: 'stat-label', text: label }), h('div', { class: 'stat-num', text: value }), detail ? h('div', { class: 'fine', text: detail }) : null); }
+function pill(s, variant = '') { return h('span', { class: 'pill ' + variant, text: s }); }
+function cardById(id) { return dataset.cards.find(x => x.id === id); }
+function locById(id) { return dataset.locations.find(x => x.id === id); }
+function cardLabel(id) { const c = cardById(id); return c ? c.name + (c.last4 ? ' ····' + c.last4 : '') : '（登録なし・外部）'; }
+function locLabel(id) { return locById(id)?.name || '場所未設定'; }
+function cardLine(c, detail = '') { return h('div', { class: 'card-line' }, h('div', { class: 'card-main' }, h('div', { class: 'swatch', style: `background:${COLORS[c.color]?.[1] || COLORS.navy[1]}` }), h('div', {}, h('div', { class: 'card-name', text: c.name }), h('div', { class: 'card-extra', text: [c.issuer, BRAND[c.brand] || null, c.last4 ? '下4桁 ' + c.last4 : null, locLabel(c.locationId)].filter(Boolean).join(' · ') }), detail ? h('div', { class: 'card-extra', text: detail }) : null)), btn('詳細', () => showCard(c.id), 'small')); }
+function renderNav() { const n = $('#bottom-nav'); n.replaceChildren(); for (const [id, sym, label] of [['home', '⌂', 'ホーム'], ['cards', '▤', 'カード'], ['locations', '▦', '場所'], ['cancel', '◷', '解約検討'], ['settings', '⚙', '設定']]) {
+    const b = h('button', { type: 'button', class: currentView === id ? 'active' : '', onclick: () => go(id) }, h('span', { class: 'symbol', text: sym }), h('span', { text: label }));
+    b.setAttribute('aria-current', currentView === id ? 'page' : 'false');
+    n.append(b);
+} }
+function go(id) { if (!unlocked)
+    return; closeModal(); currentView = id; selectedCard = null; render(); window.scrollTo({ top: 0, behavior: 'instant' }); }
+function render() { if (!unlocked)
+    return; app.hidden = false; lockScreen.hidden = true; renderNav(); main.replaceChildren(); const views = { home: renderHome, cards: renderCards, locations: renderLocations, cancel: renderCancel, settings: renderSettings }; (views[currentView] || renderHome)(); }
+function activeCards() { return dataset.cards.filter(c => c.status !== 'canceled'); }
+function yearlyStats() { const arr = activeCards(); const paid = arr.filter(c => c.annualFeeType === 'paid'), conditional = arr.filter(c => c.annualFeeType === 'conditional_free'); const sure = paid.reduce((sum, c) => sum + (c.annualFeeYen || 0), 0); const optional = conditional.reduce((sum, c) => sum + (c.annualFeeYen || 0), 0); const unknown = paid.filter(c => c.annualFeeYen === null).length + conditional.filter(c => c.annualFeeYen === null).length + arr.filter(c => c.annualFeeType === 'unknown').length; return { sure, optional, unknown }; }
+function collectAlerts() {
+    const result = [], today = jstToday(), thisMonth = today.slice(0, 7), month = Number(today.slice(5, 7));
+    for (const c of activeCards()) {
+        if (isStale(c))
+            result.push({ type: 'stale', id: c.id, title: '6か月以上未使用', text: `${c.name} · 最終使用 ${c.lastUsedOn}`, urgent: cancelCandidate(c) });
+        if (c.expiry) {
+            const diff = monthsBetween(thisMonth, c.expiry);
+            if (diff <= 3)
+                result.push({ type: 'expiry', id: c.id, title: diff < 0 ? '有効期限が過ぎています' : `有効期限が${diff === 0 ? '今月' : `あと${diff}か月`}`, text: `${c.name} · ${ymFmt(c.expiry)}`, urgent: diff <= 0 });
+        }
+        if (c.annualFeeMonth === month && feeApplies(c))
+            result.push({ type: 'fee', id: c.id, title: '年会費の請求月', text: `${c.name} · ${ymFmt(thisMonth)} · 年額 ${money(c.annualFeeYen)}${c.annualFeeType === 'conditional_free' ? '（条件未達と記録）' : ''}`, urgent: false });
+    }
+    return result.sort((a, b) => Number(b.urgent) - Number(a.urgent));
+}
+function renderHome() {
+    const all = activeCards(), stats = yearlyStats(), alerts = collectAlerts();
+    main.append(heading('ホーム', btn('＋ カードを登録', () => editCard(null), 'primary')));
+    main.append(h('div', { class: 'grid3' }, stat('保有カード', all.length + '枚', '解約済み ' + dataset.cards.filter(c => c.status === 'canceled').length + '枚'), stat('使用中', all.filter(c => c.status === 'active').length + '枚', 'たまに使用 ' + all.filter(c => c.status === 'occasional').length + '枚'), stat('休眠・未使用', all.filter(c => c.status === 'dormant').length + '枚', '最終使用日不明 ' + all.filter(c => !c.lastUsedOn).length + '枚')));
+    main.append(h('h3', { class: 'section-title', text: '年会費の目安' }), h('div', { class: 'grid3' }, stat('有料カードの年額', money(stats.sure), '金額判明分のみ'), stat('条件未達時の上乗せ', money(stats.optional), '条件付き無料・金額判明分'), stat('金額など未確定', stats.unknown + '枚', '正確な合計額ではありません')));
+    main.append(h('h3', { class: 'section-title', text: `アラート（${alerts.length}件）` }), h('div', { class: 'sub', text: '画面内に表示するだけです。自動通知・請求予測は行いません。' }));
+    if (alerts.length) {
+        main.append(h('div', { class: 'alerts' }, ...alerts.map(a => h('div', { class: 'alert-item ' + (a.urgent ? 'urgent' : '') }, h('div', { class: 'row-between' }, h('strong', { text: a.title }), pill(a.type === 'expiry' ? '期限' : a.type === 'fee' ? '年会費' : '未使用', a.urgent ? 'red' : 'warn')), h('div', { text: a.text }), btn('カードを見る', () => showCard(a.id), 'small')))));
+    }
+    else
+        main.append(h('div', { class: 'empty', text: '現在の条件に一致するアラートはありません。最終使用日が不明のカードは未使用判定できません。' }));
+    main.append(h('h3', { class: 'section-title', text: '最近更新したカード' }));
+    const recent = dataset.cards.slice().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 5);
+    main.append(recent.length ? h('div', { class: 'cards' }, ...recent.map(c => cardLine(c, `${STATUS[c.status]} · 最終使用 ${dateFmt(c.lastUsedOn)}`))) : h('div', { class: 'empty', text: 'カードを登録するとここに表示されます。' }));
+}
+function renderCards() {
+    main.append(heading('カード一覧', btn('＋ カードを登録', () => editCard(null), 'primary')));
+    const filter = h('div', { class: 'filters' });
+    const query = h('input', { type: 'search', placeholder: 'カード名・発行会社・下4桁・用途', id: 'search-card' });
+    const status = h('select', { id: 'filter-status' }), location = h('select', { id: 'filter-location' }), brand = h('select', { id: 'filter-brand' }), tag = h('select', { id: 'filter-tag' }), sort = h('select', { id: 'sort-card' });
+    fillSelect(status, [['', '全状態'], ...Object.entries(STATUS)]);
+    fillSelect(location, [['', '全場所'], ...dataset.locations.map(l => [l.id, l.name])]);
+    fillSelect(brand, [['', '全ブランド'], ...Object.entries(BRAND)]);
+    fillSelect(tag, [['', '全用途'], ...Object.entries(TAGS)]);
+    fillSelect(sort, [['updated', '更新が新しい'], ['name', 'カード名順'], ['lastused', '最終使用日が新しい'], ['fee', '年会費が高い'], ['status', '状態順']]);
+    filter.append(query, status, location, brand, tag, sort);
+    const count = h('p', { class: 'sub' }), out = h('div', { class: 'cards' });
+    main.append(filter, count, out);
+    function apply() {
+        const q = query.value.normalize('NFKC').trim().toLocaleLowerCase('ja-JP');
+        let list = dataset.cards.filter(c => (!q || [c.name, c.issuer, c.last4 || '', BRAND[c.brand] || '', ...c.usageTags.map(t => TAGS[t])].join(' ').normalize('NFKC').toLocaleLowerCase('ja-JP').includes(q)) && (!status.value || c.status === status.value) && (!brand.value || c.brand === brand.value) && (!tag.value || c.usageTags.includes(tag.value)) && (!location.value || c.locationId === location.value));
+        const sortBy = sort.value;
+        if (sortBy === 'name')
+            list.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+        else if (sortBy === 'lastused')
+            list.sort((a, b) => (b.lastUsedOn || '').localeCompare(a.lastUsedOn || ''));
+        else if (sortBy === 'fee')
+            list.sort((a, b) => (b.annualFeeYen ?? -1) - (a.annualFeeYen ?? -1));
+        else if (sortBy === 'status')
+            list.sort((a, b) => a.status.localeCompare(b.status));
+        else
+            list.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+        count.textContent = `${list.length}件 / 全${dataset.cards.length}件`;
+        out.replaceChildren(...list.map(c => cardLine(c, `${STATUS[c.status]} · 最終使用 ${dateFmt(c.lastUsedOn)}`)));
+        if (!list.length)
+            out.append(h('div', { class: 'empty', text: '条件に一致するカードはありません。' }));
+    }
+    for (const x of [query, status, location, brand, tag, sort])
+        x.addEventListener('input', apply);
+    apply();
+}
+function renderLocations() {
+    main.append(heading('保管場所', btn('＋ 場所を追加', () => editLocation(null))));
+    const list = dataset.locations.slice().sort((a, b) => a.sortOrder - b.sortOrder);
+    for (const loc of list) {
+        const cards = dataset.cards.filter(c => c.locationId === loc.id && c.status !== 'canceled');
+        const section = h('section', { class: 'panel', style: 'margin-bottom:13px' }, h('div', { class: 'row-between' }, h('h3', { style: 'margin:0', text: `${loc.name}（${cards.length}枚）` }), btn('場所編集', () => editLocation(loc.id), 'small')));
+        section.append(h('div', { class: 'cards', style: 'margin-top:12px' }, ...(cards.length ? cards.map(c => cardLine(c, c.digitalRegistrations.length ? 'デジタル: ' + c.digitalRegistrations.map(k => DIG[k]).join(' / ') : 'デジタル登録なし')) : [h('div', { class: 'fine', text: 'この場所に保管中のカードはありません。' })])));
+        main.append(section);
+    }
+    const canceled = dataset.cards.filter(c => c.status === 'canceled');
+    if (canceled.length)
+        main.append(h('p', { class: 'sub', text: `解約済み${canceled.length}枚は保管場所一覧から除外しています。カード一覧で確認できます。` }));
+}
+function renderCancel() {
+    main.append(heading('解約検討リスト'));
+    main.append(h('div', { class: 'info', text: '自動抽出条件：最終使用日から6か月以上経過 ＋ 年会費が有料、または条件付き無料で未達成と記録。未設定の使用日は自動判定しません。解約そのものは行いません。' }));
+    const candidates = dataset.cards.filter(cancelCandidate).sort((a, b) => (a.lastUsedOn || '').localeCompare(b.lastUsedOn || '')), considering = dataset.cards.filter(c => c.status === 'considering_cancel' && !candidates.some(x => x.id === c.id));
+    main.append(h('h3', { class: 'section-title', text: `条件に一致（${candidates.length}枚）` }));
+    if (!candidates.length)
+        main.append(h('div', { class: 'empty', text: '現時点で自動抽出されるカードはありません。' }));
+    for (const c of candidates)
+        main.append(cancelTile(c, true));
+    main.append(h('h3', { class: 'section-title', text: `手動で解約検討中（条件外 ${considering.length}枚）` }));
+    if (!considering.length)
+        main.append(h('div', { class: 'sub', text: '手動で指定した条件外のカードはありません。' }));
+    for (const c of considering)
+        main.append(cancelTile(c, false));
+    const unknown = activeCards().filter(c => !c.lastUsedOn && feeApplies(c));
+    if (unknown.length)
+        main.append(h('div', { class: 'warning', style: 'margin-top:20px', text: `最終使用日が未設定の年会費対象カード ${unknown.length}枚は、6か月判定できないため自動抽出していません。` }));
+}
+function cancelTile(c, auto) { const checks = dataset.migrationChecks.filter(m => m.sourceCardId === c.id), pending = checks.filter(m => m.state === 'pending').length; return h('section', { class: 'panel', style: 'margin-top:12px' }, h('div', { class: 'row-between' }, h('strong', { text: c.name }), pill(auto ? '6か月以上未使用＋年会費あり' : '手動で検討中', 'warn')), h('div', { class: 'sub', text: `最終使用: ${dateFmt(c.lastUsedOn)} · 年会費 ${FEES[c.annualFeeType]} / ${money(c.annualFeeYen)} · 移行チェック未確認 ${pending}件` }), h('div', { class: 'btn-row', style: 'margin-top:9px' }, btn('詳細・移行確認', () => showCard(c.id), 'primary small'), c.status !== 'considering_cancel' ? btn('解約検討を開始', () => startConsideration(c.id), 'small') : null)); }
+function renderSettings() {
+    main.append(heading('設定・データ'));
+    const security = h('section', { class: 'panel stack' }, h('h3', { style: 'margin:0', text: 'PINと保護範囲' }), dangerMsg('PINは画面の表示を制御するだけです。IndexedDBに保存したカード情報は暗号化されず、端末の保存領域にアクセスできる人には読み取られ得ます。'), h('div', { class: 'sub', text: 'PIN: 半角数字4桁 / 無操作5分でロック / 画面を閉じる・他アプリへ切り替えるとロック / 5回誤入力で30秒停止。' }), h('div', { class: 'btn-row' }, btn('PINを変更', editPin), btn('今すぐロック', () => lock('手動でロックしました'))));
+    main.append(security);
+    main.append(h('section', { class: 'panel stack', style: 'margin-top:14px' }, h('h3', { style: 'margin:0', text: 'バックアップと復元' }), h('div', { class: 'sub', text: '暗号化JSONを標準とします。暗号化パスフレーズはPINとは別の12文字以上で、アプリには保存しません。復元時は全データ置換＋PIN再設定です。' }), h('div', { class: 'btn-row' }, btn('暗号化JSONを書き出す', showExport, 'primary'), btn('平文JSONを書き出す', () => { try {
+        if (exportPlain())
+            toast('平文JSONの保存先を確認してください');
+    }
+    catch (e) {
+        fail(e, '平文書き出し');
+    } }, 'danger'), btn('JSONを読み込んで復元', showImport)), h('div', { class: 'fine', text: 'ブラウザ内の保存は永続保証がありません。書き出しファイルが実際に保存されたこと、別環境で復元できることを確認してください。OS側の自動同期はアプリから制御できません。' })));
+    const locSection = h('section', { class: 'panel stack', style: 'margin-top:14px' }, h('div', { class: 'row-between' }, h('h3', { style: 'margin:0', text: '保管場所の管理' }), btn('＋ 追加', () => editLocation(null), 'small')));
+    for (const l of dataset.locations.slice().sort((a, b) => a.sortOrder - b.sortOrder)) {
+        locSection.append(h('div', { class: 'row-between' }, h('span', { text: l.name }), h('div', { class: 'btn-row' }, btn('編集', () => editLocation(l.id), 'small'), btn('削除', () => deleteLocation(l.id), 'small danger'))));
+    }
+    main.append(locSection);
+    main.append(h('section', { class: 'panel stack', style: 'margin-top:14px' }, h('h3', { style: 'margin:0', text: '保存・動作環境' }), h('div', { class: 'sub', text: `バージョン ${APP_VERSION} / スキーマ ${SCHEMA} / 保存: IndexedDB / カード${dataset.cards.length}件・サービス${dataset.services.length}件` }), h('div', { class: 'sub', text: `現在のドキュメント: ${location.protocol === 'file:' ? 'ローカルファイル (file://)' : '非file://'} · 通信機能なし` }), btn('IndexedDBを再診断', async () => { try {
+        await storageCheck();
+        toast('書き込み・読み直し・削除テスト PASS');
+    }
+    catch (e) {
+        fail(e, '保存診断');
+    } }, 'small'), h('div', { class: 'fine', text: 'file:// での保存領域はブラウザ・配置場所によって異なる場合があります。ファイル移動後・ブラウザ更新後は復元の準備が必要になることがあります。' })));
+}
+function showCard(id) {
+    if (!unlocked)
+        return;
+    const c = cardById(id);
+    if (!c)
+        return;
+    selectedCard = id;
+    closeModal();
+    const body = h('div', { class: 'stack' });
+    const hero = h('section', { class: 'panel' }, h('div', { class: 'row-between' }, h('div', { class: 'row-between' }, h('span', { class: 'swatch', style: `background:${COLORS[c.color]?.[1] || COLORS.navy[1]}` }), h('strong', { text: c.name })), pill(STATUS[c.status])), h('div', { class: 'sub', text: `${c.issuer} · ${textOr(BRAND[c.brand])} · 下4桁 ${textOr(c.last4)}` }));
+    hero.append(h('div', { class: 'btn-row', style: 'margin-top:12px' }, btn('編集', () => editCard(id), 'primary'), btn('今日使った', () => usedToday(id)), btn('削除', () => deleteCard(id), 'danger')));
+    body.append(hero);
+    body.append(h('section', { class: 'panel' }, h('h3', { style: 'margin-top:0', text: '保管・カード情報' }), dl([['保管場所', locLabel(c.locationId)], ['デジタル登録', c.digitalRegistrations.map(k => DIG[k]).join('、') || 'なし'], ['用途', c.usageTags.map(k => TAGS[k]).join('、') || 'なし'], ['有効期限', ymFmt(c.expiry)], ['最終使用日', dateFmt(c.lastUsedOn)], ['年会費', FEES[c.annualFeeType] + ' / ' + money(c.annualFeeYen)], ['条件未達', c.annualFeeType === 'conditional_free' ? (c.feeConditionUnmet ? 'はい' : 'いいえ・未確認') : '対象外'], ['年会費請求月', c.annualFeeMonth ? `${c.annualFeeMonth}月` : '未設定'], ['締め日', dayFmt(c.closingDay)], ['引落日', dayFmt(c.debitDay)], ['引落先銀行名', textOr(c.debitBankName)], ['ポイント', textOr(c.pointProgram)], ['ポイント失効メモ', textOr(c.pointExpiryMemo)], ['メモ', textOr(c.memo)]])));
+    const services = dataset.services.filter(s => s.currentCardId === id);
+    const serviceSection = h('section', { class: 'panel' }, h('div', { class: 'row-between' }, h('h3', { style: 'margin:0', text: `紐付けサービス（${services.length}件）` }), btn('＋ サービスを登録', () => editService(null, id), 'small primary')));
+    if (!services.length)
+        serviceSection.append(h('p', { class: 'sub', text: 'このカードで支払い中と登録されたサービスはありません。' }));
+    for (const s of services)
+        serviceSection.append(h('div', { class: 'service-row' }, h('div', {}, h('strong', { text: s.name }), h('div', { class: 'sub', text: `${SERVICE_CATEGORIES[s.category] || '区分未設定'} · 月額目安 ${money(s.monthlyEstimateYen)}` })), btn('編集・移行', () => editService(s.id), 'small')));
+    serviceSection.append(h('div', { class: 'btn-row', style: 'margin-top:10px' }, btn('全サービスから移行・編集', () => showServicesDirectory(), 'small')));
+    body.append(serviceSection);
+    const checks = dataset.migrationChecks.filter(m => m.sourceCardId === id).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    const transfer = dataset.transfers.filter(t => t.sourceCardId === id || t.destinationCardId === id).sort((a, b) => b.movedOn.localeCompare(a.movedOn));
+    const migr = h('section', { class: 'panel' }, h('div', { class: 'row-between' }, h('h3', { style: 'margin:0', text: `解約前の移行確認（${checks.length}件）` }), btn('対象サービスを登録', () => startConsideration(id), 'small')));
+    const pending = checks.filter(m => m.state === 'pending').length;
+    if (pending)
+        migr.append(h('div', { class: 'warning', style: 'margin-top:10px', text: `未確認 ${pending}件。カードを解約する前に、実際のサービス側で変更を確認してください。` }));
+    if (!checks.length)
+        migr.append(h('p', { class: 'sub', text: 'チェックはありません。検討開始すると現在紐付くサービスを追加します。' }));
+    for (const m of checks)
+        migr.append(h('div', { class: 'service-row' }, h('div', {}, h('strong', { text: m.serviceName }), h('div', { class: 'sub', text: `${MIG_STATES[m.state]} · 移行先 ${m.destinationCardId ? cardLabel(m.destinationCardId) : '未登録・未指定'} · 移行日 ${dateFmt(m.movedOn)} · 確認日 ${dateFmt(m.confirmedOn)}` })), btn('確認を更新', () => editMigration(m.id), 'small')));
+    if (transfer.length) {
+        migr.append(h('h4', { text: `カード移行履歴（${transfer.length}件）` }));
+        for (const t of transfer)
+            migr.append(h('div', { class: 'sub', text: `${t.movedOn}　${t.serviceName}: ${cardLabel(t.sourceCardId)} → ${t.destinationCardId ? cardLabel(t.destinationCardId) : 'カード未指定'}` }));
+    }
+    body.append(migr);
+    showModal('カード詳細', body);
+}
+function dl(items) { const d = h('dl', { class: 'data-list' }); for (const [key, value] of items)
+    d.append(h('dt', { text: key }), h('dd', { text: value })); return d; }
+function fillSelect(select, options, selected) { select.replaceChildren(); for (const [val, label] of options) {
+    const o = h('option', { value: val, text: label });
+    select.append(o);
+} if (selected !== undefined && selected !== null)
+    select.value = String(selected); return select; }
+function field(label, control, hint) { const id = 'f' + Math.random().toString(36).slice(2, 10); control.id = id; return h('div', { class: 'field' }, h('label', { htmlFor: id, text: label }), control, hint ? h('span', { class: 'help', text: hint }) : null); }
+function input(type, value = '', attrs = {}) { return h('input', { type, value: value === null ? '' : value, ...attrs }); }
+function textField(label, value, options = {}) { return field(label, input(options.type || 'text', value, { maxLength: options.maxLength || 80, required: !!options.required, placeholder: options.placeholder || '', inputMode: options.inputMode || 'text' }), options.hint || ''); }
+function selectField(label, options, val, hint) { const c = h('select'); fillSelect(c, options, val); return field(label, c, hint); }
+function areaField(label, value, maxLength = 1000) { return field(label, h('textarea', { rows: 3, maxLength, value: value || '' }), '12桁以上の数字列を検出したら警告します（保存自体は止めません）。'); }
+function grid(...children) { return h('div', { class: 'grid2' }, ...children); }
+function details(title, open = true) { const d = h('details', { class: 'form-section' }); d.open = open; d.append(h('summary', { text: title })); return d; }
+function bodyOf(d) { const b = h('div', { class: 'form-content' }); d.append(b); return b; }
+function checkBoxes(choices, selected = []) { const group = h('div', { class: 'check-grid' }); for (const [k, v] of Object.entries(choices)) {
+    const cb = h('input', { type: 'checkbox', value: k, checked: selected.includes(k) });
+    group.append(h('label', {}, cb, h('span', { text: v })));
+} return group; }
+function valsOfCheck(box) { return $$('input[type="checkbox"]:checked', box).map(x => x.value); }
+function currentCardTemplate() { const now = ts(); return { id: uuid(), name: '', issuer: '', brand: null, last4: null, color: 'navy', expiry: null, locationId: dataset.locations[0]?.id || null, digitalRegistrations: [], status: 'active', usageTags: [], annualFeeType: 'unknown', annualFeeYen: null, annualFeeMonth: null, feeConditionUnmet: false, closingDay: null, debitDay: null, debitBankName: null, pointProgram: null, pointExpiryMemo: null, lastUsedOn: null, canceledOn: null, memo: null, createdAt: now, updatedAt: now }; }
+function nullText(s) { return s.trim() ? s.trim() : null; }
+function numberOrNull(s) { return s === '' ? null : Number(s); }
+function upsertCheck(d, sourceId, s, opts = {}) { let m = d.migrationChecks.find(m => m.sourceCardId === sourceId && m.serviceId === s.id); const now = ts(); if (!m) {
+    m = { id: uuid(), sourceCardId: sourceId, serviceId: s.id, serviceName: s.name, state: 'pending', destinationCardId: null, movedOn: null, confirmedOn: null, createdAt: now, updatedAt: now };
+    d.migrationChecks.push(m);
+} if (opts.transfer) {
+    m.state = 'pending';
+    m.confirmedOn = null;
+    m.destinationCardId = opts.destinationId || null;
+    m.movedOn = opts.movedOn || null;
+    m.updatedAt = now;
+} return m; }
+function ensureChecks(d, sourceId) { for (const s of d.services.filter(s => s.currentCardId === sourceId))
+    upsertCheck(d, sourceId, s); }
+async function startConsideration(id) { try {
+    if (await mutate(d => { ensureChecks(d, id); const c = d.cards.find(x => x.id === id); if (c && c.status !== 'canceled') {
+        c.status = 'considering_cancel';
+        c.updatedAt = ts();
+    } })) {
+        toast('解約検討チェックを更新しました');
+        showCard(id);
+    }
+}
+catch (e) {
+    fail(e, '解約チェック開始');
+} }
+async function usedToday(id) { try {
+    if (await mutate(d => { const c = d.cards.find(x => x.id === id); assert(c, 'カードが見つかりません'); assert(c.status !== 'canceled', '解約済みカードは使用登録できません'); c.lastUsedOn = jstToday(); c.updatedAt = ts(); })) {
+        toast('最終使用日を本日（JST）に更新しました');
+        showCard(id);
+    }
+}
+catch (e) {
+    fail(e, '使用日更新');
+} }
+function editCard(id) {
+    const old = id ? cardById(id) : null;
+    if (id && !old)
+        return;
+    const c = old ? structuredClone(old) : currentCardTemplate(), form = h('form', { class: 'stack' });
+    const basic = details('基本情報（必須項目）');
+    const bc = bodyOf(basic);
+    const name = textField('カード名 *', c.name, { required: true, maxLength: 80, placeholder: '例: メインカード' }), issuer = textField('発行会社 *', c.issuer, { required: true, maxLength: 80, placeholder: '例: ○○カード' });
+    const loc = selectField('現物の保管場所 *', [['', '選択してください'], ...dataset.locations.map(x => [x.id, x.name])], c.locationId || '');
+    const st = selectField('使用状態 *', Object.entries(STATUS), c.status);
+    bc.append(grid(name, issuer), grid(loc, st));
+    $('select', loc).required = true;
+    form.append(basic);
+    const appearance = details('カードの表示・用途', false);
+    const ap = bodyOf(appearance);
+    const brand = selectField('国際ブランド', [['', '未設定'], ...Object.entries(BRAND)], c.brand || '');
+    const last4 = textField('カード番号の下4桁のみ', c.last4, { maxLength: 4, inputMode: 'numeric', placeholder: '0000', hint: 'フル番号は入力・保存しません。' });
+    const expiry = field('有効期限（月／年のみ・任意）', input('month', c.expiry || ''));
+    const color = field('カード色', h('div', { class: 'color-grid' }, ...Object.entries(COLORS).map(([key, [label, hex]]) => h('label', { class: 'color-choice' }, h('input', { type: 'radio', name: 'card-color', value: key, checked: c.color === key || (!c.color && key === 'navy'), style: 'min-height:18px;width:18px' }), h('span', { class: 'color-dot', style: `background:${hex}` }), h('span', { text: label })))));
+    const digitals = field('デジタル登録（複数選択）', checkBoxes(DIG, c.digitalRegistrations));
+    const tags = field('用途タグ（複数選択）', checkBoxes(TAGS, c.usageTags));
+    ap.append(grid(brand, last4), grid(expiry, color), digitals, tags);
+    form.append(appearance);
+    const billing = details('年会費・引落・ポイント', false), bil = bodyOf(billing);
+    const feeType = selectField('年会費区分', Object.entries(FEES).map(([k, v]) => [k, v]), c.annualFeeType);
+    const feeAmount = textField('年会費（税込・円）', c.annualFeeYen ?? '', { type: 'number', placeholder: '不明なら空欄' });
+    const month = selectField('年会費請求月', [['', '未設定'], ...Array.from({ length: 12 }, (_, i) => [String(i + 1), `${i + 1}月`])], c.annualFeeMonth || '');
+    const condition = h('label', {}, h('input', { type: 'checkbox', checked: c.feeConditionUnmet, style: 'width:20px;min-height:18px;height:18px;vertical-align:middle;margin-right:8px' }), '条件付き無料の達成条件が未達成');
+    const days = [['', '未設定'], ...Array.from({ length: 31 }, (_, i) => [String(i + 1), `${i + 1}日`]), ['eom', '末日']];
+    const closing = selectField('締め日（日のみ）', days, c.closingDay || '');
+    const debit = selectField('引落日（日のみ）', days, c.debitDay || '');
+    const bank = textField('引落先銀行名（口座番号は禁止）', c.debitBankName, { maxLength: 80 });
+    const program = textField('ポイントプログラム', c.pointProgram, { maxLength: 80 });
+    const pointMemo = areaField('ポイント失効メモ', c.pointExpiryMemo, 500);
+    const used = field('最終使用日（任意）', input('date', c.lastUsedOn || ''));
+    bil.append(grid(feeType, feeAmount), grid(month, used), condition, grid(closing, debit), bank, program, pointMemo);
+    form.append(billing);
+    const notes = details('自由メモ', false), nb = bodyOf(notes);
+    const memo = areaField('メモ', c.memo, 1000);
+    nb.append(memo);
+    form.append(notes);
+    const actions = h('div', { class: 'btn-row end form-actions' }, btn('キャンセル', closeModal));
+    if (!old)
+        actions.append(h('button', { type: 'submit', class: 'btn', value: 'continue', name: 'save-kind', text: '保存して続けて登録' }));
+    actions.append(h('button', { type: 'submit', class: 'btn primary', value: 'save', name: 'save-kind', text: '保存' }));
+    form.append(actions);
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (isBusy)
+            return;
+        const again = e.submitter?.value === 'continue';
+        const updated = { ...c, name: $('input', name).value.trim(), issuer: $('input', issuer).value.trim(), locationId: $('select', loc).value || null, status: $('select', st).value, brand: $('select', brand).value || null, last4: $('input', last4).value.trim() || null, expiry: $('input', expiry).value || null, color: $('input[type=radio]:checked', color)?.value || 'navy', digitalRegistrations: valsOfCheck(digitals), usageTags: valsOfCheck(tags), annualFeeType: $('select', feeType).value, annualFeeYen: numberOrNull($('input', feeAmount).value), annualFeeMonth: numberOrNull($('select', month).value), feeConditionUnmet: $('select', feeType).value === 'conditional_free' && $('input', condition).checked, closingDay: parseDay($('select', closing).value), debitDay: parseDay($('select', debit).value), debitBankName: nullText($('input', bank).value), pointProgram: nullText($('input', program).value), pointExpiryMemo: nullText($('textarea', pointMemo).value), lastUsedOn: $('input', used).value || null, memo: nullText($('textarea', memo).value), updatedAt: ts() };
+        if (updated.annualFeeType === 'free')
+            updated.annualFeeYen = 0;
+        if (updated.last4 && !/^\d{4}$/.test(updated.last4)) {
+            alert('番号は下4桁のみ（半角数字4文字）で入力してください。');
+            return;
+        }
+        if (updated.annualFeeYen !== null && (!Number.isSafeInteger(updated.annualFeeYen) || updated.annualFeeYen < 0)) {
+            alert('年会費は0以上の整数（円）を入力してください。');
+            return;
+        }
+        if (updated.status === 'canceled' && c.status !== 'canceled') {
+            updated.canceledOn = jstToday();
+            const linked = dataset.services.filter(s => s.currentCardId === updated.id), existing = dataset.migrationChecks.filter(m => m.sourceCardId === updated.id && m.state === 'pending');
+            const newCount = linked.filter(s => !dataset.migrationChecks.some(m => m.sourceCardId === updated.id && m.serviceId === s.id)).length;
+            if (existing.length + newCount > 0 && !confirm(`解約手続きの確認です。移行確認が未完了のサービスが${existing.length + newCount}件あります。\n支払い設定の移行漏れの可能性があります。\nそれでもアプリ上で「解約済み」に記録しますか？`))
+                return;
+        }
+        else if (updated.status !== 'canceled')
+            updated.canceledOn = null;
+        isBusy = true;
+        e.submitter.disabled = true;
+        try {
+            const saved = await mutate(d => { const i = d.cards.findIndex(x => x.id === updated.id); if (i >= 0)
+                d.cards[i] = updated;
+            else
+                d.cards.push(updated); if (updated.status === 'considering_cancel' || updated.status === 'canceled')
+                ensureChecks(d, updated.id); });
+            if (saved) {
+                toast(old ? 'カードを更新しました' : 'カードを登録しました');
+                closeModal();
+                if (again) {
+                    currentView = 'cards';
+                    render();
+                    editCard(null);
+                }
+                else if (old)
+                    showCard(updated.id);
+                else {
+                    currentView = 'cards';
+                    render();
+                }
+            }
+        }
+        catch (err) {
+            fail(err, 'カード保存');
+        }
+        finally {
+            isBusy = false;
+            e.submitter.disabled = false;
+        }
+    });
+    showModal(old ? 'カードを編集' : 'カードを登録', form);
+}
+function parseDay(v) { return v === '' ? null : v === 'eom' ? 'eom' : Number(v); }
+async function deleteCard(id) {
+    const c = cardById(id);
+    if (!c)
+        return;
+    const serv = dataset.services.filter(s => s.currentCardId === id).length, mig = dataset.migrationChecks.filter(m => m.sourceCardId === id || m.destinationCardId === id).length, tr = dataset.transfers.filter(t => t.sourceCardId === id || t.destinationCardId === id).length;
+    const info = serv || mig || tr ? `\n紐付けサービス${serv}件は「カード未指定」に変更し、関係する移行チェック${mig}件・移行履歴${tr}件を削除します。記録の消失に注意してください。` : '';
+    if (!confirm(`「${c.name}」を完全に削除しますか？\n元に戻すにはバックアップが必要です。${info}`))
+        return;
+    try {
+        if (await mutate(d => { d.cards = d.cards.filter(x => x.id !== id); for (const s of d.services)
+            if (s.currentCardId === id) {
+                s.currentCardId = null;
+                s.updatedAt = ts();
+            } d.migrationChecks = d.migrationChecks.filter(m => m.sourceCardId !== id && m.destinationCardId !== id); d.transfers = d.transfers.filter(t => t.sourceCardId !== id && t.destinationCardId !== id); })) {
+            closeModal();
+            render();
+            toast('カードを削除しました');
+        }
+    }
+    catch (e) {
+        fail(e, 'カード削除');
+    }
+}
+function editLocation(id) {
+    const old = id ? locById(id) : null;
+    const form = h('form', { class: 'stack' }), name = textField('場所名（40文字以内）', old?.name || '', { maxLength: 40, required: true });
+    form.append(name, h('div', { class: 'btn-row end' }, btn('キャンセル', closeModal), h('button', { type: 'submit', class: 'btn primary', text: '保存' })));
+    form.addEventListener('submit', async (e) => { e.preventDefault(); const value = $('input', name).value.trim(); try {
+        if (await mutate(d => { if (old) {
+            const target = d.locations.find(l => l.id === id);
+            target.name = value;
+        }
+        else
+            d.locations.push({ id: uuid(), name: value, sortOrder: d.locations.reduce((m, l) => Math.max(m, l.sortOrder), -1) + 1 }); })) {
+            closeModal();
+            render();
+            toast('保管場所を保存しました');
+        }
+    }
+    catch (err) {
+        fail(err, '場所の保存');
+    } });
+    showModal(old ? '保管場所を編集' : '保管場所を追加', form);
+}
+async function deleteLocation(id) { const loc = locById(id); if (!loc)
+    return; const count = dataset.cards.filter(c => c.locationId === id).length; if (count) {
+    alert(`この場所を使っているカードが${count}枚あります。先にカードの保管場所を変更してください。`);
+    return;
+} if (dataset.locations.length === 1) {
+    alert('最後の保管場所は削除できません。');
+    return;
+} if (!confirm(`保管場所「${loc.name}」を削除しますか？`))
+    return; try {
+    if (await mutate(d => { d.locations = d.locations.filter(l => l.id !== id); })) {
+        render();
+        toast('保管場所を削除しました');
+    }
+}
+catch (e) {
+    fail(e, '場所の削除');
+} }
+function showModal(title, content) { closeModal(); const modal = h('section', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title }); const head = h('div', { class: 'modal-head' }, h('h2', { text: title }), h('button', { class: 'modal-close', type: 'button', 'aria-label': '閉じる', text: '×', onclick: closeModal })); modal.append(head, h('div', { class: 'modal-body' }, content)); modalRoot.append(modal); modalRoot.classList.add('open'); modalRoot.onclick = e => { if (e.target === modalRoot)
+    closeModal(); }; const first = $('input,select,button', modal); if (first)
+    first.focus({ preventScroll: true }); }
+function closeModal() { modalRoot.replaceChildren(); modalRoot.classList.remove('open'); modalRoot.onclick = null; }
+function showServicesDirectory() { const list = h('div', { class: 'stack' }, h('div', { class: 'row-between' }, h('span', { class: 'sub', text: `登録済み ${dataset.services.length}件。移行前のカードから変更先へ付け替えできます。` }), btn('＋ サービスを追加', () => editService(null, null), 'small primary'))); for (const s of dataset.services.slice().sort((a, b) => a.name.localeCompare(b.name, 'ja')))
+    list.append(h('div', { class: 'service-row' }, h('div', {}, h('strong', { text: s.name }), h('div', { class: 'sub', text: `支払カード: ${s.currentCardId ? cardLabel(s.currentCardId) : '未指定'} · 月額 ${money(s.monthlyEstimateYen)}` })), btn('編集・移行', () => editService(s.id), 'small'))); if (dataset.services.length === 0)
+    list.append(h('div', { class: 'empty', text: 'サービスはまだ登録されていません。' })); showModal('紐付けサービス一覧', list); }
+function editService(id, defaultCardId = null) {
+    const old = id ? dataset.services.find(s => s.id === id) : null;
+    if (id && !old)
+        return;
+    const s = old ? structuredClone(old) : { id: uuid(), name: '', category: 'subscription', monthlyEstimateYen: null, currentCardId: defaultCardId, createdAt: ts(), updatedAt: ts() };
+    const form = h('form', { class: 'stack' }), name = textField('サービス名 *', s.name, { maxLength: 100, required: true, placeholder: '例: 音楽配信サービス' }), category = selectField('分類', [['', '未設定'], ...Object.entries(SERVICE_CATEGORIES)], s.category || ''), monthly = textField('月額目安（円）', s.monthlyEstimateYen ?? '', { type: 'number', placeholder: '任意' }), card = selectField('支払カード・移行先カード', [['', 'カード未指定・アプリ外'], ...dataset.cards.map(c => [c.id, c.name + '（' + STATUS[c.status] + '）'])], s.currentCardId || ''), moved = field('移行日（支払カードを変更する場合）', input('date', jstToday()));
+    form.append(name, grid(category, monthly), card, moved, h('div', { class: 'info', text: 'カードを変更すると移行日つきの履歴を残し、旧カードの移行確認を「未確認」にします。実際のサービス側の設定変更は行いません。' }));
+    const act = h('div', { class: 'btn-row end' });
+    if (old)
+        act.append(btn('サービス削除', () => deleteService(old.id), 'danger'));
+    act.append(btn('キャンセル', closeModal), h('button', { type: 'submit', class: 'btn primary', text: '保存' }));
+    form.append(act);
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (isBusy)
+            return;
+        const fresh = { ...s, name: $('input', name).value.trim(), category: $('select', category).value || null, monthlyEstimateYen: numberOrNull($('input', monthly).value), currentCardId: $('select', card).value || null, updatedAt: ts() };
+        const moveDay = $('input', moved).value;
+        if (fresh.monthlyEstimateYen !== null && (!Number.isSafeInteger(fresh.monthlyEstimateYen) || fresh.monthlyEstimateYen < 0)) {
+            alert('月額は0以上の整数（円）を入力してください。');
+            return;
+        }
+        if (old && old.currentCardId !== fresh.currentCardId && !isDate(moveDay)) {
+            alert('移行日を入力してください。');
+            return;
+        }
+        isBusy = true;
+        e.submitter.disabled = true;
+        try {
+            if (await mutate(d => { const ix = d.services.findIndex(x => x.id === fresh.id); if (ix >= 0) {
+                const previous = d.services[ix];
+                d.services[ix] = fresh;
+                if (previous.currentCardId && previous.currentCardId !== fresh.currentCardId) {
+                    d.transfers.push({ id: uuid(), serviceId: fresh.id, serviceName: fresh.name, sourceCardId: previous.currentCardId, destinationCardId: fresh.currentCardId, movedOn: moveDay, createdAt: ts() });
+                    upsertCheck(d, previous.currentCardId, fresh, { transfer: true, destinationId: fresh.currentCardId, movedOn: moveDay });
+                }
+            }
+            else
+                d.services.push(fresh); })) {
+                closeModal();
+                render();
+                toast('サービスを保存しました。移行先の反映は本人が確認してください。');
+                if (selectedCard && cardById(selectedCard))
+                    showCard(selectedCard);
+                else
+                    showServicesDirectory();
+            }
+        }
+        catch (err) {
+            fail(err, 'サービス保存');
+        }
+        finally {
+            isBusy = false;
+            e.submitter.disabled = false;
+        }
+    });
+    showModal(old ? 'サービスの編集・移行' : 'サービス登録', form);
+}
+async function deleteService(id) {
+    const s = dataset.services.find(x => x.id === id);
+    if (!s)
+        return;
+    const checks = dataset.migrationChecks.filter(m => m.serviceId === id), transfers = dataset.transfers.filter(t => t.serviceId === id);
+    const pending = checks.filter(m => m.state === 'pending').length;
+    if (!confirm(`「${s.name}」をサービス一覧から削除しますか？\n移行チェック${checks.length}件（未確認${pending}件）、移行履歴${transfers.length}件は記録として残ります。\n今後そのサービスは支払カード一覧に表示されません。`))
+        return;
+    try {
+        if (await mutate(d => { d.services = d.services.filter(x => x.id !== id); })) {
+            closeModal();
+            render();
+            toast('サービスを削除しました（移行履歴は保持）');
+            if (selectedCard && cardById(selectedCard))
+                showCard(selectedCard);
+        }
+    }
+    catch (e) {
+        fail(e, 'サービス削除');
+    }
+}
+function editMigration(id) {
+    const m = dataset.migrationChecks.find(x => x.id === id);
+    if (!m)
+        return;
+    const form = h('form', { class: 'stack' }, h('div', { class: 'info', text: '「移行確認済み」はサービス提供元の支払先変更が実際に反映されたことを確認した場合だけ選んでください。' }));
+    const state = selectField('確認状態', Object.entries(MIG_STATES), m.state);
+    const dest = selectField('移行先カード', [['', 'アプリ内のカードなし・未指定'], ...dataset.cards.filter(c => c.id !== m.sourceCardId).map(c => [c.id, c.name])], m.destinationCardId || '');
+    const moved = field('移行日（任意）', input('date', m.movedOn || ''));
+    const confirmed = field('確認日（完了時・任意）', input('date', m.confirmedOn || jstToday()));
+    form.append(h('div', { text: `対象: ${m.serviceName}` }), state, dest, grid(moved, confirmed), h('div', { class: 'btn-row end' }, btn('キャンセル', closeModal), h('button', { class: 'btn primary', type: 'submit', text: '確認状態を保存' })));
+    form.addEventListener('submit', async (e) => { e.preventDefault(); const nextState = $('select', state).value, confirmedOn = nextState === 'pending' ? null : ($('input', confirmed).value || jstToday()); try {
+        if (await mutate(d => { const t = d.migrationChecks.find(x => x.id === id); t.state = nextState; t.destinationCardId = $('select', dest).value || null; t.movedOn = $('input', moved).value || null; t.confirmedOn = confirmedOn; t.updatedAt = ts(); })) {
+            closeModal();
+            toast('移行確認を記録しました');
+            showCard(m.sourceCardId);
+        }
+    }
+    catch (err) {
+        fail(err, '移行確認の保存');
+    } });
+    showModal('移行チェックの更新', form);
+}
+function showExport() {
+    const form = h('form', { class: 'stack' }), one = field('バックアップ専用パスフレーズ（12文字以上）', input('password', '', { minLength: 12, maxLength: 256, required: true, autocomplete: 'new-password' })), two = field('確認のため再入力', input('password', '', { minLength: 12, maxLength: 256, required: true, autocomplete: 'new-password' })), message = h('p', { class: 'sub', text: 'PBKDF2-HMAC-SHA256 600,000回 ＋ AES-256-GCM。PINは含みません。書き出し後、実際のファイルを安全な場所に保管してください。' });
+    form.append(message, one, two, h('div', { class: 'btn-row end' }, btn('キャンセル', closeModal), h('button', { type: 'submit', class: 'btn primary', text: '暗号化ファイルを作成' })));
+    form.addEventListener('submit', async (e) => { e.preventDefault(); if (isBusy)
+        return; isBusy = true; e.submitter.disabled = true; try {
+        await exportEncrypted($('input', one).value, $('input', two).value);
+        $('input', one).value = '';
+        $('input', two).value = '';
+        closeModal();
+        toast('暗号化JSONを生成しました。ファイルの保存先を確認してください。');
+    }
+    catch (err) {
+        fail(err, '暗号化書き出し');
+    }
+    finally {
+        isBusy = false;
+        if (e.submitter.isConnected)
+            e.submitter.disabled = false;
+    } });
+    showModal('暗号化JSONを書き出す', form);
+}
+function showImport() {
+    let candidate = null;
+    const form = h('form', { class: 'stack' }), file = field('JSONファイル（最大8MiB）', h('input', { type: 'file', accept: '.json,.enc,application/json', required: true })), pass = field('暗号化JSONのパスフレーズ（平文なら空欄）', input('password', '', { maxLength: 256, autocomplete: 'off' })), preview = h('div', { class: 'hidden' }), inspect = h('button', { type: 'submit', class: 'btn primary', text: '内容を検査する' });
+    const replace = h('button', { type: 'button', class: 'btn danger', text: '確認して全件置換・PIN再設定', disabled: true });
+    form.append(dangerMsg('復元すると現在のカード・保管場所・サービス・移行履歴がすべて置き換わります。元データは自動バックアップされません。復元完了後、PINを必ず再設定します。'), file, pass, inspect, preview, replace);
+    const invalidate = () => { candidate = null; replace.disabled = true; preview.classList.add('hidden'); preview.replaceChildren(); };
+    $('input', file).addEventListener('change', invalidate);
+    $('input', pass).addEventListener('input', invalidate);
+    form.addEventListener('submit', async (e) => { e.preventDefault(); if (isBusy)
+        return; const epoch = sessionToken; const obj = $('input', file).files[0]; if (!obj) {
+        alert('ファイルを選んでください');
+        return;
+    } if (obj.size > MAX_FILE_SIZE) {
+        alert('ファイルは8MiB以下にしてください');
+        return;
+    } isBusy = true; inspect.disabled = true; try {
+        const data = JSON.parse(await obj.text());
+        let payload;
+        if (data?.format === ENC_FORMAT) {
+            if (!$('input', pass).value)
+                throw new Error('暗号化ファイルのパスフレーズを入力してください');
+            payload = await decryptBackup(data, $('input', pass).value);
+        }
+        else if (data?.format === PLAIN_FORMAT) {
+            requireAllowed(data, ['format', 'formatVersion', 'payloadVersion', 'exportedAt', 'dataset'], '平文バックアップ');
+            assert(data.formatVersion === 1, '平文バックアップの形式版が不正です');
+            payload = { payloadVersion: data.payloadVersion, exportedAt: data.exportedAt, dataset: data.dataset };
+        }
+        else
+            throw new Error('このアプリが出力したバックアップ形式ではありません');
+        assert(unlocked && sessionToken === epoch, 'ロックされたため復元準備を中止しました');
+        candidate = structuredClone(validatePayload(payload));
+        const risks = riskyNumbers(candidate);
+        preview.replaceChildren(h('h3', { text: '復元対象の事前確認' }), dl([['カード', candidate.cards.length + '件'], ['保管場所', candidate.locations.length + '件'], ['サービス', candidate.services.length + '件'], ['移行チェック', candidate.migrationChecks.length + '件'], ['カード移行履歴', candidate.transfers.length + '件'], ['現在のカード', dataset.cards.length + '件'], ['現在のサービス', dataset.services.length + '件']]), risks.length ? dangerMsg('長い数字列の警告がある項目: ' + risks.join('、')) : h('p', { class: 'sub', text: '12桁以上の長数字列は検出されませんでした（安全性を保証するものではありません）。' }), h('div', { class: 'warning', text: '現在のデータを置き換えます。必要なら先に現在のJSONバックアップを作成してください。' }));
+        preview.classList.remove('hidden');
+        replace.disabled = false;
+        toast('事前検査が完了しました（まだ復元していません）');
+    }
+    catch (err) {
+        invalidate();
+        fail(err, 'ファイル検査');
+    }
+    finally {
+        isBusy = false;
+        inspect.disabled = false;
+    } });
+    replace.addEventListener('click', async () => { if (isBusy || !candidate)
+        return; const replacement = structuredClone(candidate); if (!confirmRisk(replacement))
+        return; if (!confirm(`最終確認: 現在のカード${dataset.cards.length}件・サービス${dataset.services.length}件を消して、選択したバックアップで全件置換します。\nPINは削除され、新しいPINが必要になります。\n\n復元しますか？`))
+        return; isBusy = true; replace.disabled = true; try {
+        await restoreDataset(replacement);
+        $('input', pass).value = '';
+        toast('復元しました。新しいPINを設定してください');
+    }
+    catch (e) {
+        fail(e, '復元');
+        replace.disabled = false;
+    }
+    finally {
+        isBusy = false;
+    } });
+    showModal('JSONバックアップを読み込む', form);
+}
+function editPin() {
+    const form = h('form', { class: 'stack' }), old = field('現在のPIN', input('password', '', { inputMode: 'numeric', maxLength: 4, required: true, autocomplete: 'off' })), next = field('新しいPIN（数字4桁）', input('password', '', { inputMode: 'numeric', maxLength: 4, required: true, autocomplete: 'new-password' })), again = field('新しいPINを再入力', input('password', '', { inputMode: 'numeric', maxLength: 4, required: true, autocomplete: 'new-password' }));
+    form.append(old, next, again, h('div', { class: 'btn-row end' }, btn('キャンセル', closeModal), h('button', { type: 'submit', class: 'btn primary', text: 'PINを変更' })));
+    form.addEventListener('submit', async (e) => { e.preventDefault(); if (isBusy)
+        return; const p = $('input', old).value, n = $('input', next).value, a = $('input', again).value; if (!/^\d{4}$/.test(n) || n !== a) {
+        alert('新しいPINは半角数字4桁で一致させてください');
+        return;
+    } isBusy = true; try {
+        await verifyPin(p);
+        await setPin(n);
+        closeModal();
+        toast('PINを変更しました');
+    }
+    catch (err) {
+        fail(err, 'PIN変更');
+    }
+    finally {
+        isBusy = false;
+    } });
+    showModal('PINを変更', form);
+}
+function lock(reason = 'PINを入力してください') { sessionToken++; unlocked = false; lastActivity = 0; selectedCard = null; closeModal(); main.replaceChildren(); app.hidden = true; lockScreen.hidden = false; renderLock(reason); }
+function renderLock(reason) {
+    lockScreen.replaceChildren();
+    clearInterval(lockTicker);
+    const setup = !pinState, form = h('form', { class: 'stack' }), title = h('h1', { text: setup ? '初回のPIN設定' : 'カードの使い方管理' }), explain = h('p', { class: 'sub', text: setup ? 'この端末で使う画面ロック用PINを設定します。' : 'PINを入力すると端末内の管理データを表示します。' });
+    const box = h('section', { class: 'lock-box' }, title, explain);
+    if (reason)
+        box.append(h('p', { class: 'info', text: reason }));
+    box.append(dangerMsg('PINは画面操作の制限だけです。端末内のカード情報は暗号化されていません。ブラウザの保存データを守る仕組みではありません。'));
+    const pin = field(setup ? '新しい4桁PIN' : '4桁PIN', input('password', '', { inputMode: 'numeric', maxLength: 4, required: true, autocomplete: setup ? 'new-password' : 'off', placeholder: '••••' }));
+    form.append(pin);
+    let confirmPin = null;
+    if (setup) {
+        confirmPin = field('PINをもう一度入力', input('password', '', { inputMode: 'numeric', maxLength: 4, required: true, autocomplete: 'new-password', placeholder: '••••' }));
+        form.append(confirmPin);
+    }
+    const error = h('p', { class: 'error hidden', 'aria-live': 'polite' }), submit = h('button', { type: 'submit', class: 'btn primary full', text: setup ? 'PINを設定して開始' : 'ロックを解除' });
+    form.append(error, submit);
+    box.append(form, h('p', { class: 'fine', text: 'PINを忘れたときはこの画面からは解除できません。ブラウザのサイトデータ削除後、保存済みJSONから復元して新しいPINを設定してください（削除前にバックアップがあることを確認）。' }));
+    lockScreen.append(box);
+    const updateLockCountdown = () => { if (setup || !pinState)
+        return; const left = Math.ceil((pinState.lockUntil - Date.now()) / 1000); if (left > 0) {
+        submit.disabled = true;
+        submit.textContent = `再試行まで ${left}秒`;
+    }
+    else {
+        submit.disabled = false;
+        submit.textContent = 'ロックを解除';
+    } };
+    lockTicker = setInterval(updateLockCountdown, 1000);
+    updateLockCountdown();
+    form.addEventListener('submit', async (e) => { e.preventDefault(); if (isBusy)
+        return; const p = $('input', pin).value; if (!/^\d{4}$/.test(p)) {
+        error.textContent = '半角数字4桁を入力してください';
+        error.classList.remove('hidden');
+        return;
+    } isBusy = true; submit.disabled = true; error.classList.add('hidden'); try {
+        if (setup) {
+            if (p !== $('input', confirmPin).value)
+                throw new Error('確認用PINが一致しません');
+            await setPin(p);
+        }
+        else
+            await verifyPin(p);
+        if (document.visibilityState === 'hidden')
+            return;
+        sessionToken++;
+        unlocked = true;
+        lastActivity = Date.now();
+        clearInterval(lockTicker);
+        $('input', pin).value = '';
+        if (confirmPin)
+            $('input', confirmPin).value = '';
+        currentView = 'home';
+        render();
+    }
+    catch (err) {
+        error.textContent = err.message || 'PINを確認してください';
+        error.classList.remove('hidden');
+        $('input', pin).value = '';
+        if (!setup)
+            pinState = await getKV('pin');
+    }
+    finally {
+        isBusy = false;
+        updateLockCountdown();
+    } });
+}
+function showStartupError(e) { unlocked = false; app.hidden = true; lockScreen.hidden = false; lockScreen.replaceChildren(h('section', { class: 'lock-box' }, h('h1', { text: '保存機能を利用できません' }), h('div', { class: 'error', text: 'IndexedDBまたはWeb Cryptoを使えないため、アプリを安全に開始できません。データは一時メモリに保存しません。' }), h('p', { text: '原因: ' + (e && e.message || '不明') }), h('p', { class: 'sub', text: 'ブラウザのプライベートモード・ローカルファイルの権限・保存領域の設定を確認してください。' }), h('button', { class: 'btn', type: 'button', text: '再試行', onclick: () => location.reload() }))); }
+async function bootstrap() { try {
+    assert(typeof indexedDB !== 'undefined', 'IndexedDBが使用できません');
+    assert(crypto && crypto.subtle && crypto.getRandomValues && crypto.randomUUID, 'Web Cryptoが使用できません');
+    db = await openDb();
+    await storageCheck();
+    dataset = await getKV('dataset');
+    if (!dataset) {
+        const initial = newDataset();
+        await putKV('dataset', initial);
+        dataset = initial;
+    }
+    validDataset(dataset);
+    pinState = await getKV('pin') || null;
+    if (pinState) {
+        assert(pinState.formatVersion === 1 && pinState.iterations === PIN_ITERATIONS, 'PIN設定の版が不正です');
+    }
+    lock(pinState ? 'PINを解除して開始してください' : '初回利用：PINを設定してください');
+}
+catch (e) {
+    showStartupError(e);
+} }
+$('#manual-lock').addEventListener('click', () => lock('手動でロックしました'));
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && unlocked && modalRoot.classList.contains('open'))
+    closeModal(); if (unlocked)
+    lastActivity = Date.now(); });
+for (const eventType of ['pointerdown', 'input', 'touchstart', 'scroll'])
+    document.addEventListener(eventType, () => { if (unlocked)
+        lastActivity = Date.now(); }, { passive: true, capture: true });
+document.addEventListener('visibilitychange', () => { if (document.hidden && unlocked)
+    lock('画面が非表示になったためロックしました');
+else if (unlocked && Date.now() - lastActivity >= 300000)
+    lock('5分間操作がなかったためロックしました'); });
+window.addEventListener('pagehide', () => { if (unlocked)
+    lock('ページを離れたためロックしました'); });
+window.addEventListener('focus', () => { if (unlocked && Date.now() - lastActivity >= 300000)
+    lock('5分間操作がなかったためロックしました'); });
+inactivityTimer = setInterval(() => { if (unlocked && Date.now() - lastActivity >= 300000)
+    lock('5分間操作がなかったためロックしました'); }, 10000);
+bootstrap();
+</script>
+</body>
+</html>
