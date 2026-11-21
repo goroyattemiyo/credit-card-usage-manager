@@ -4,7 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; object-src 'none'; media-src 'none'; font-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="theme-color" content="#172842">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="カード管理">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; worker-src 'self'; manifest-src 'self'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; media-src 'none'; font-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <title>カードの使い方管理</title>
 <style>
 :root{font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#17233a;background:#f5f7fc;font-size:15px;line-height:1.55;--navy:#172842;--blue:#315af2;--pale:#edf2ff;--border:#dce3f0;--muted:#65738b;--red:#b72e35;--green:#166a4d}
@@ -31,8 +37,8 @@ header{background:var(--navy);color:white;position:sticky;top:0;z-index:10;box-s
 <div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
-/* Card Usage Manager / Gate 1 MVP / v0.1.0. No network code or external dependencies. */
-const APP_VERSION = '0.1.0', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+/* Card Usage Manager / PWA + Gate 1 MVP / v0.2.0. No external APIs or third-party dependencies. */
+const APP_VERSION = '0.2.0', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
 const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
 const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
 const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
@@ -42,7 +48,7 @@ const DIG = { apple_pay: 'Apple Pay', google_pay: 'Google Pay', paypay: 'PayPay'
 const SERVICE_CATEGORIES = { subscription: 'サブスク', utility: '公共料金', shopping: 'ネット通販', other: 'その他' };
 const MIG_STATES = { pending: '未確認', verified_moved: '移行確認済み', not_needed: '移行不要' };
 const COLORS = { navy: ['ネイビー', '#263959'], black: ['ブラック', '#252932'], white: ['ホワイト', '#f9fafb'], silver: ['シルバー', '#adb9c6'], gold: ['ゴールド', '#d6af52'], blue: ['ブルー', '#4775d6'], red: ['レッド', '#c34f5b'], green: ['グリーン', '#32896f'], purple: ['パープル', '#8c63ae'], pink: ['ピンク', '#e3a0b9'] };
-const DEFAULT_LOCATIONS = ['普段の財布', 'サブ財布', '家の金庫', '引き出し', 'その他'];
+const DEFAULT_LOCATIONS = ['普段の財布', 'サブ財布', '家の金庫', '引き出し', 'その他', '現物なし'];
 const CARD_KEYS = ['id', 'name', 'issuer', 'brand', 'last4', 'color', 'expiry', 'locationId', 'digitalRegistrations', 'status', 'usageTags', 'annualFeeType', 'annualFeeYen', 'annualFeeMonth', 'feeConditionUnmet', 'closingDay', 'debitDay', 'debitBankName', 'pointProgram', 'pointExpiryMemo', 'lastUsedOn', 'canceledOn', 'memo', 'createdAt', 'updatedAt'];
 const LOCATION_KEYS = ['id', 'name', 'sortOrder'];
 const SERVICE_KEYS = ['id', 'name', 'category', 'monthlyEstimateYen', 'currentCardId', 'createdAt', 'updatedAt'];
@@ -139,6 +145,42 @@ catch (e) {
 function putKV(key, value) { return new Promise((resolve, reject) => { const tx = db.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put(value, key); tx.oncomplete = resolve; tx.onerror = () => reject(tx.error || new Error('保存失敗')); tx.onabort = () => reject(tx.error || new Error('保存中止')); }); }
 async function storageCheck() { const k = '__diagnostic__'; await putKV(k, { ok: 1 }); const v = await getKV(k); if (!v || v.ok !== 1)
     throw new Error('IndexedDBで再読み取りができません'); await new Promise((res, rej) => { const t = db.transaction(DB_STORE, 'readwrite'); t.objectStore(DB_STORE).delete(k); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+// 既存ユーザーのデータへ「現物なし」を一度だけ追記する。変更は1トランザクションで確定し、カード・PINは触らない。
+function migrateNoPhysicalLocation() {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        const store = tx.objectStore(DB_STORE);
+        const req = store.get('dataset');
+        let next = null, problem = null;
+        req.onsuccess = () => {
+            try {
+                const existing = req.result;
+                validDataset(existing);
+                if (existing.locations.some(l => l.name.normalize('NFKC').trim() === '現物なし')) {
+                    next = existing;
+                    return;
+                }
+                assert(existing.locations.length < 200, '保管場所が上限のため「現物なし」を追加できません');
+                next = structuredClone(existing);
+                next.locations.push({
+                    id: uuid(),
+                    name: '現物なし',
+                    sortOrder: Math.max(-1, ...next.locations.map(l => l.sortOrder)) + 1
+                });
+                next.revision += 1;
+                validDataset(next);
+                store.put(next, 'dataset');
+            } catch (e) {
+                problem = e;
+                tx.abort();
+            }
+        };
+        req.onerror = () => { problem = req.error; };
+        tx.oncomplete = () => resolve(next);
+        tx.onabort = () => reject(problem || tx.error || new Error('保管場所の移行を中止しました'));
+        tx.onerror = () => reject(problem || tx.error || new Error('保管場所の移行に失敗しました'));
+    });
+}
 function requireAllowed(obj, keys, path) { if (!obj || typeof obj !== 'object' || Array.isArray(obj))
     throw new Error(`${path}はオブジェクト形式が必要です`); const unwanted = Object.keys(obj).filter(k => !keys.includes(k)); if (unwanted.length)
     throw new Error(`${path}に未定義の項目があります: ${unwanted.slice(0, 3).join(', ')}`); for (const k of keys)
@@ -591,7 +633,7 @@ function editCard(id) {
     const basic = details('基本情報（必須項目）');
     const bc = bodyOf(basic);
     const name = textField('カード名 *', c.name, { required: true, maxLength: 80, placeholder: '例: メインカード' }), issuer = textField('発行会社 *', c.issuer, { required: true, maxLength: 80, placeholder: '例: ○○カード' });
-    const loc = selectField('現物の保管場所 *', [['', '選択してください'], ...dataset.locations.map(x => [x.id, x.name])], c.locationId || '');
+    const loc = selectField('保管場所 *（デジタル専用は「現物なし」）', [['', '選択してください'], ...dataset.locations.map(x => [x.id, x.name])], c.locationId || '');
     const st = selectField('使用状態 *', Object.entries(STATUS), c.status);
     bc.append(grid(name, issuer), grid(loc, st));
     $('select', loc).required = true;
@@ -1044,6 +1086,7 @@ async function bootstrap() { try {
         dataset = initial;
     }
     validDataset(dataset);
+    dataset = await migrateNoPhysicalLocation();
     pinState = await getKV('pin') || null;
     if (pinState) {
         assert(pinState.formatVersion === 1 && pinState.iterations === PIN_ITERATIONS, 'PIN設定の版が不正です');
@@ -1070,6 +1113,16 @@ window.addEventListener('focus', () => { if (unlocked && Date.now() - lastActivi
     lock('5分間操作がなかったためロックしました'); });
 inactivityTimer = setInterval(() => { if (unlocked && Date.now() - lastActivity >= 300000)
     lock('5分間操作がなかったためロックしました'); }, 10000);
+// file:// では従来どおり単体HTMLとして動作。SWは安全なHTTP(S)配信時のみ登録する。
+function registerOfflineWorker() {
+    if ((location.protocol !== 'http:' && location.protocol !== 'https:') || !window.isSecureContext || !('serviceWorker' in navigator))
+        return;
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' })
+            .catch(() => console.warn('オフライン用キャッシュの登録に失敗しました。配信設定を確認してください。'));
+    });
+}
+registerOfflineWorker();
 bootstrap();
 </script>
 </body>
