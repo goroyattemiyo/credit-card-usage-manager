@@ -1,4 +1,4 @@
-# カード管理 v0.3.5｜Google Driveアカウント別バックアップ
+# カード管理 v0.3.6｜Google Driveアカウント別バックアップ
 
 ## 仕様
 
@@ -17,7 +17,7 @@
 - Google Cloud Consoleの「承認済みのJavaScript生成元」：`https://goroyattemiyo.github.io`（URLのパスは含めない）、ローカルテストでは `http://localhost:8765`。
 - 利用するGoogle Cloudプロジェクトで**Google Drive APIを有効化**し、OAuthクライアント種別を**ウェブ アプリケーション**にする。
 - **複数の一般ユーザーに使ってもらうには、Google Auth Platform → 対象で「External（外部）」を設定し、Googleの公開ステータスを確認すること**。Testing（テスト）では、許可されたテストユーザーしか利用できない。External / In productionの場合も、Google側のブランド認証・公開審査などが求められることがある。これはアプリのコードとは別のGoogle Cloud設定で、現時点で実際のステータスは未確認。
-- クライアントIDの変更画面は一般利用者には不要なためv0.3.5で撤去。以前にローカル保存した別IDも使用せず、アプリ共通IDを使う。
+- クライアントIDの変更画面は一般利用者には不要なためv0.3.6で撤去。以前にローカル保存した別IDも使用せず、アプリ共通IDを使う。
 
 ## 実機テスト手順（最初は架空のカードのみ）
 
@@ -33,7 +33,7 @@
 | U08 | 認証拒否、権限不足、ネットワーク切断、アカウント識別不能 | 保存・復元せずエラー。既存の端末データは保持される |
 | U09 | 画面ロック、認証ポップアップ中断 | 既存のセッションが失われた場合、安全に中止 |
 | U10 | 従来のローカルJSON書き出し・読み込み | 従来どおり動作する |
-| U11 | PWA再読み込み | バージョン0.3.2、Service Workerキャッシュもv0.3.5 |
+| U11 | PWA再読み込み | バージョン0.3.6、Service Workerキャッシュもv0.3.6 |
 
 ## 注意点
 
@@ -48,8 +48,8 @@
 
 - Node.js構文検証：PASS
 - 2つのGoogleアカウントを模擬したアカウント選択・保存／一覧／読取・誤操作／異常系：28項目PASS（実コードの関数を使った模擬テスト）
-- Google実認証・実Drive API操作・2アカウントの実機検証：**未検証**
-- Google Auth PlatformのExternal/Testing/Productionステータス：**未確認**
+- Googleの実アカウント認証・Drive保存・ファイル読込／復号：**利用者が動作を報告済み**。別アカウントへの切替、端末データの全件置換完了：**未検証**
+- Google Auth PlatformのExternal/Productionステータス：**利用者が2026年11月21日の画面で確認済み**
 
 参考：
 - [Google Identity Services TokenClient.prompt](https://developers.google.com/identity/oauth2/web/reference/js-reference)
@@ -57,7 +57,7 @@
 - [Drive API権限とdrive.file](https://developers.google.com/workspace/drive/api/guides/api-specific-auth)
 - [OAuthアプリ公開ステータス](https://developers.google.com/identity/protocols/oauth2/production-readiness/overview)
 
-## パスワード管理画面との干渉対策 (v0.3.5)
+## パスワード管理画面との干渉対策 (v0.3.6)
 - バックアップ用パスフレーズやPIN変更画面で、Chromeなどのパスワード選択UIが一時的にページ非表示を起こしても、20秒以内なら入力ダイアログを維持する。
 - 一時非表示の間はアプリ全体を隠す。20秒以上の非表示・5分間の無操作・ページ移動・パスワード欄以外からの画面切替は従来どおりロックする。
 - パスワード欄を含むダイアログでは、外側クリックやEscapeで閉じず、×またはキャンセルで閉じる。
@@ -70,7 +70,7 @@ node tests/password-manager-modal.test.cjs
 node tests/service-worker.test.cjs
 ```
 
-## OAuth本番公開のためのブランド情報（v0.3.5）
+## OAuth本番公開のためのブランド情報（v0.3.6）
 - ホームページ: https://goroyattemiyo.github.io/credit-card-usage-manager/
 - プライバシーポリシー: https://goroyattemiyo.github.io/credit-card-usage-manager/privacy.html
 - 利用規約: https://goroyattemiyo.github.io/credit-card-usage-manager/terms.html
@@ -78,9 +78,20 @@ node tests/service-worker.test.cjs
 - 上記URLはGitHub Pagesのデプロイ完了後にページ表示を確認する。
 - Google Auth Platform > 対象の「アプリを公開」操作はオーナーが実施する。画面表示と認可のE2Eは未検証。
 
-## 暗号化Driveバックアップの1操作化（v0.3.5）
+## 暗号化Driveバックアップの1操作化（v0.3.6）
 - パスフレーズを2回入力したら、「Googleアカウントを選択して暗号化保存」を1回押す。
 - ボタン操作から同期的にGoogle認証画面を開く。承認・アカウントメール取得後、保存先を確認し、AES-256-GCM暗号化→復号自己検証→アップロード→再取得照合を自動で連続実行する。
 - パスフレーズ未入力・不一致ではGoogle認証を起動せず、エラーで停止。Googleアカウント確認のキャンセルではDriveへ送信しない。
 - 暗号化前後でIndexedDBのrevisionを確認する。アップロードの開始後に通信エラーが発生した場合は重複送信を防止し、バックアップ一覧での確認を促す。
 - 暗号化処理・同意画面・Google APIなど実機でしか確認できないものは未検証。
+
+## Driveからの復元ステータスを明確化（v0.3.6）
+- 「バックアップ一覧の取得」だけでは端末データは変更されない。
+- バックアップを選び、パスフレーズで復号・検査が成功すると、完了表示とカード／サービス件数を表示する。この段階でも端末データは変更されない。
+- 検査に成功するまでは、破壊的な「このバックアップで端末データを置き換える」ボタンを表示しない。
+- データ全件置換を実行する場合だけ、端末の現状件数とバックアップの件数、PIN再設定を再確認する。キャンセル時は置換しない。
+- IndexedDBの復元トランザクション完了後はPIN設定画面へ移り、「復元完了」およびカード／サービス件数を表示する。
+- 読み込み成功・全件復元成功の混同を防ぐための表示改善であり、既存のバックアップJSON形式や暗号化方式は変更しない。
+- 実機でバックアップ一覧・復号確認が動作したことは利用者が報告済み。実データの全件置換結果は未確認。
+
+検証：`node tests/drive-restore-feedback.test.cjs` （12項目）、既存のパスワード管理画面とService Worker回帰テスト。

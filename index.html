@@ -39,8 +39,8 @@ html.password-picker-hidden #app,html.password-picker-hidden #lock-screen,html.p
 <div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
-/* Card Usage Manager / PWA / v0.3.5. Google Drive network access only on explicit backup/restore actions. */
-const APP_VERSION = '0.3.5', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+/* Card Usage Manager / PWA / v0.3.6. Google Drive network access only on explicit backup/restore actions. */
+const APP_VERSION = '0.3.6', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
 const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
 const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
 const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
@@ -389,7 +389,7 @@ catch (e) {
     problem = e;
     tx.abort();
     return;
-} store.put(next, 'dataset'); store.delete('pin'); }; r.onerror = () => { problem = r.error; }; tx.oncomplete = () => { dataset = next; pinState = null; resolve(); }; tx.onabort = () => reject(problem || tx.error || new Error('復元の保存を中止しました')); tx.onerror = () => reject(problem || tx.error || new Error('復元できません')); }); await txPromise; lock('バックアップから復元しました。新しいPINを設定してください'); }
+} store.put(next, 'dataset'); store.delete('pin'); }; r.onerror = () => { problem = r.error; }; tx.oncomplete = () => { dataset = next; pinState = null; resolve(); }; tx.onabort = () => reject(problem || tx.error || new Error('復元の保存を中止しました')); tx.onerror = () => reject(problem || tx.error || new Error('復元できません')); }); await txPromise; lock(`✅ 復元完了：カード${obj.cards.length}枚・サービス${obj.services.length}件をこの端末へ保存しました。新しい4桁PINを設定してください。`); }
 function pinHash(pin, salt, iterations = PIN_ITERATIONS) { return kdf(pin, salt, iterations, 'bits').then(bits => new Uint8Array(bits)); }
 function equalBytes(a, b) { if (a.length !== b.length)
     return false; let diff = 0; for (let i = 0; i < a.length; i++)
@@ -1198,14 +1198,16 @@ async function showDriveRestore() {
     assert(driveOriginSupported(), 'Google Drive連携はHTTPSまたはlocalhostで開いてください');
     const epoch = sessionToken;
     let token = null, candidate = null, sdkReady = false, selected = null, accountEmail = null;
-    const state = h('div', { class: 'info', text: 'Google認証を準備しています…' });
+    const state = h('div', { class: 'info', 'aria-live': 'polite', text: 'Google認証を準備しています…（端末データは未変更）' });
+    const restoreHelp = h('p', { class: 'fine', text: 'バックアップを読み込み、復号・検査に成功するまでは復元できません。確認だけなら閉じて構いません。' });
     const results = h('div', { class: 'stack' });
     const pass = field('選択した暗号化バックアップのパスフレーズ',
         input('password', '', { maxLength: 256, autocomplete: 'off' }));
     const getList = btn('Googleアカウントを選んでバックアップを表示', async () => {
         if (!sdkReady || isBusy) return;
         isBusy = true; getList.disabled = true;
-        token = null; candidate = null; selected = null; accountEmail = null; results.replaceChildren(); restore.disabled = true;
+        token = null; candidate = null; selected = null; accountEmail = null; results.replaceChildren(); restore.disabled = true; restore.hidden = true;
+        restoreHelp.textContent = 'バックアップの選択・検査だけでは端末のカード情報は変更されません。';
         try {
             const nextTokenPromise = requestDriveToken(clientId, epoch);
             token = await nextTokenPromise;
@@ -1214,14 +1216,15 @@ async function showDriveRestore() {
             assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため検索を中止しました');
             const { items, hasMore } = await listDriveEncrypted(token);
             assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため検索を中止しました');
-            state.textContent = `Googleアカウント: ${accountEmail} / 暗号化バックアップ${items.length}件。${hasMore ? '最新100件まで表示しています。' : ''}`;
+            state.textContent = `✅ Driveのバックアップ一覧を取得しました（${items.length}件）。まだ復元していません。アカウント: ${accountEmail}。${hasMore ? '最新100件まで表示しています。' : ''}`;
             if (!items.length) results.append(h('p', { class: 'sub', text: 'このOAuthアプリが作成した暗号化バックアップが見つかりません。別のクライアントIDで作成したファイルは表示されない場合があります。' }));
             for (const item of items) {
                 const choose = btn('選択', () => {
-                    selected = item; candidate = null; restore.disabled = true;
+                    selected = item; candidate = null; restore.disabled = true; restore.hidden = true;
+                    restoreHelp.textContent = 'まずパスフレーズを入力して復号・検査してください。この時点では端末データは変わりません。';
                     results.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
                     choose.setAttribute('aria-pressed', 'true');
-                    state.textContent = `Googleアカウント: ${accountEmail} / 選択中: ${item.name}。パスフレーズを入力して「復号・検査」を押してください。`;
+                    state.textContent = `バックアップを選択しました：${item.name}（${accountEmail}）。パスフレーズを入力して「選択したファイルを復号・検査」を押してください。まだ端末に復元していません。`;
                 }, 'small');
                 results.append(h('div', { class: 'row-between' },
                     h('span', { class: 'fine', text: `${item.name} · ${item.createdTime || '日時不明'} · ${item.size || '?'} bytes` }), choose));
@@ -1232,7 +1235,8 @@ async function showDriveRestore() {
     getList.disabled = true;
     const inspect = btn('選択したファイルを復号・検査', async () => {
         if (isBusy || !selected || !token) return;
-        isBusy = true; inspect.disabled = true; candidate = null; restore.disabled = true;
+        isBusy = true; inspect.disabled = true; candidate = null; restore.disabled = true; restore.hidden = true;
+        state.textContent = '暗号化バックアップを読み込み、復号・検査しています…（端末データは未変更）';
         try {
             const enc = await downloadDriveEncrypted(token, selected.id);
             const plaintext = await decryptBackup(enc, $('input', pass).value);
@@ -1241,15 +1245,16 @@ async function showDriveRestore() {
             candidate = value;
             $('input', pass).value = '';
             const risks = riskyNumbers(value);
-            state.textContent = `Googleアカウント: ${accountEmail} / 検証済み: ${value.cards.length}枚、サービス${value.services.length}件、移行履歴${value.transfers.length}件。現在のデータはカード${dataset.cards.length}枚です。${risks.length ? '12桁以上の数字列の警告: ' + risks.join('、') : '長い数字列の検出なし'}。復元するとすべて置換し、PINを再設定します。`;
-            restore.disabled = false;
-        } catch (err) { candidate = null; fail(err, 'Driveバックアップの検証'); }
+            state.textContent = `✅ 読み込み・復号・検査に成功しました。まだ端末へ復元していません。\nバックアップ：カード${value.cards.length}枚、サービス${value.services.length}件、移行履歴${value.transfers.length}件（${accountEmail}）。現在の端末：カード${dataset.cards.length}枚、サービス${dataset.services.length}件。${risks.length ? '⚠ 長い数字列の警告: ' + risks.join('、') : '長い数字列の検出なし'}。`;
+            restoreHelp.textContent = '以下のボタンは確認専用ではありません。押すと現在の端末データをバックアップで全件置換し、PINも再設定します。読み込み確認だけなら「閉じる（復元しない）」を押してください。';
+            restore.disabled = false; restore.hidden = false;
+        } catch (err) { candidate = null; state.textContent = '❌ 読み込み・復号・検査に失敗しました。端末データは変更していません。'; restoreHelp.textContent = 'パスフレーズやファイルを確認してください。'; fail(err, 'Driveバックアップの検証'); }
         finally { isBusy = false; inspect.disabled = false; }
     });
-    const restore = btn('最終確認して全件置換・PIN再設定', async () => {
+    const restore = btn('このバックアップで端末データを置き換える', async () => {
         if (isBusy || !candidate) return;
         if (!confirmRisk(candidate)) return;
-        if (!confirm(`復元元Googleアカウント：${accountEmail}\n\n現在のカード${dataset.cards.length}枚・サービス${dataset.services.length}件が全件置換されます。\nPINは削除され再設定が必要です。\n先に現在の端末データをバックアップしましたか？\n\n復元を実行しますか？`)) return;
+        if (!confirm(`【最終確認：端末データの全件置換】\n復元元：${accountEmail}\nバックアップ：カード${candidate.cards.length}枚・サービス${candidate.services.length}件\n\n現在の端末：カード${dataset.cards.length}枚・サービス${dataset.services.length}件\n\n現在のカード・保管場所・サービス・移行履歴をすべて置き換えます。PINも削除され、新しい4桁PINの設定が必要です。\n現在のデータを別途バックアップしましたか？\n\n置き換えを実行しますか？`)) return;
         isBusy = true; restore.disabled = true;
         try {
             assert(unlocked && sessionToken === epoch, 'ロックされたため復元を中止しました');
@@ -1258,16 +1263,21 @@ async function showDriveRestore() {
         } catch (err) { fail(err, 'Google Driveからの復元'); restore.disabled = false; }
         finally { isBusy = false; }
     }, 'danger');
-    restore.disabled = true;
+    restore.disabled = true; restore.hidden = true;
     const form = h('div', { class: 'stack' },
-        h('div', { class: 'warning', text: '選択したGoogleアカウントのDriveだけを読み取ります。復元すると端末内の全カードデータを置き換えます。先に現在のバックアップを保存してください。' }),
-        state, getList, results, pass, h('div', { class: 'btn-row' }, inspect, restore), btn('キャンセル', closeModal));
-    $('input', pass).addEventListener('input', () => { candidate = null; restore.disabled = true; });
+        h('div', { class: 'warning', text: '読み込み・復号・検査では現在のカードデータは変更されません。端末へ復元する場合に限り、既存データの全件置換とPIN再設定が必要です。' }),
+        state, getList, results, pass, restoreHelp, h('div', { class: 'btn-row' }, inspect, restore), btn('閉じる（復元しない）', closeModal));
+    $('input', pass).addEventListener('input', () => {
+        if (candidate) { candidate = null; restore.disabled = true; restore.hidden = true;
+            state.textContent = 'パスフレーズを変更したため、復元前の検査結果を破棄しました。もう一度復号・検査してください。';
+            restoreHelp.textContent = '端末データは変更されていません。';
+        }
+    });
     showModal('Driveの暗号化バックアップから復元', form);
     ensureDriveSdk().then(() => {
         if (!unlocked || sessionToken !== epoch || !state.isConnected) return;
         sdkReady = true; getList.disabled = false;
-        state.textContent = 'Google認証の準備ができました。ボタンを押して利用するGoogleアカウントを選択してください。';
+        state.textContent = 'Google認証の準備ができました。まずバックアップを選び、読み込み・復号・検査してください（端末データは未変更）。';
     }).catch(err => { if (state.isConnected) state.textContent = 'Google認証の準備に失敗しました: ' + err.message; });
 }
 
