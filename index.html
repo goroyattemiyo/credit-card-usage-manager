@@ -34,13 +34,13 @@ html.password-picker-hidden #app,html.password-picker-hidden #lock-screen,html.p
 <header><div class="head-inner"><h1>▣ カードの使い方管理 <small>カード情報は端末内保存 · Driveは手動バックアップのみ</small></h1><button class="btn ghost small" id="manual-lock" type="button">🔒 ロック</button></div></header>
 <main id="main"></main>
 <nav class="bottom-nav" id="bottom-nav" aria-label="主な画面"></nav>
-<footer>PINは画面表示の制御のみです。IndexedDB内のデータは暗号化されません。保存先の端末とバックアップを適切に管理してください。</footer>
+<footer>PINは画面表示の制御のみです。IndexedDB内のデータは暗号化されません。保存先の端末とバックアップを適切に管理してください。 <a href="./privacy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a> · <a href="./terms.html" target="_blank" rel="noopener noreferrer">利用規約</a></footer>
 </div>
 <div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
-/* Card Usage Manager / PWA / v0.3.3. Google Drive network access only on explicit backup/restore actions. */
-const APP_VERSION = '0.3.3', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+/* Card Usage Manager / PWA / v0.3.4. Google Drive network access only on explicit backup/restore actions. */
+const APP_VERSION = '0.3.4', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
 const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
 const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
 const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
@@ -1392,7 +1392,7 @@ function renderLock(reason) {
     }
     const error = h('p', { class: 'error hidden', 'aria-live': 'polite' }), submit = h('button', { type: 'submit', class: 'btn primary full', text: setup ? 'PINを設定して開始' : 'ロックを解除' });
     form.append(error, submit);
-    box.append(form, h('p', { class: 'fine', text: 'PINを忘れたときはこの画面からは解除できません。ブラウザのサイトデータ削除後、保存済みJSONから復元して新しいPINを設定してください（削除前にバックアップがあることを確認）。' }));
+    box.append(form, h('p', { class: 'fine', text: 'PINを忘れたときはこの画面からは解除できません。ブラウザのサイトデータ削除後、保存済みJSONから復元して新しいPINを設定してください（削除前にバックアップがあることを確認）。' }), h('p', { class: 'fine' }, h('a', { href: './privacy.html', target: '_blank', rel: 'noopener noreferrer', text: 'プライバシーポリシー' }), ' · ', h('a', { href: './terms.html', target: '_blank', rel: 'noopener noreferrer', text: '利用規約' })));
     lockScreen.append(box);
     const updateLockCountdown = () => { if (setup || !pinState)
         return; const left = Math.ceil((pinState.lockUntil - Date.now()) / 1000); if (left > 0) {

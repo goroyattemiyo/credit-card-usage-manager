@@ -2,7 +2,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
 const html=fs.readFileSync(path.resolve(__dirname, '../index.html'),'utf8');
 const app=html.match(/<script>([\s\S]*?)<\/script>/)[1];
-assert(app.includes("const APP_VERSION = '0.3.3'"));
+assert(app.includes("const APP_VERSION = '0.3.4'"));
 assert(html.includes('html.password-picker-hidden #app'));
 const start=app.indexOf('// Native password/autofill pickers can briefly hide');
 const end=app.indexOf("window.addEventListener('pagehide'",start);
