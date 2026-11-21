@@ -22,6 +22,7 @@ header{background:var(--navy);color:white;position:sticky;top:0;z-index:10;box-s
 .field{display:grid;gap:5px;min-width:0}.field label,.field .label{font-size:.86rem;font-weight:680}.field input,.field select,.field textarea{border:1px solid #becadd;background:white;border-radius:10px;padding:8px 10px;width:100%;color:var(--navy)}.field textarea{resize:vertical;min-height:85px}.field input[type=checkbox]{width:18px;height:18px;min-height:auto;accent-color:var(--blue)}.field .help{color:var(--muted);font-size:.76rem}.check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 13px}.check-grid label{display:flex;gap:8px;align-items:center;font-weight:500;font-size:.86rem}.check-grid input{flex:0 0 18px}.form-section{border:1px solid var(--border);border-radius:13px;background:#fcfdff;padding:13px 15px;margin:11px 0}.form-section summary{font-weight:750;cursor:pointer;padding:4px 0}.form-content{display:grid;gap:12px;padding-top:15px}.data-list{margin:0;display:grid;grid-template-columns:135px 1fr;gap:8px 13px}.data-list dt{color:var(--muted);font-size:.85rem}.data-list dd{margin:0;overflow-wrap:anywhere}.divider{height:1px;background:var(--border);margin:17px 0}.row-between{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.service-row{display:flex;gap:10px;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding:12px 0}.service-row:first-child{border-top:0}.compact-list{margin:8px 0;padding-left:20px}.muted{color:var(--muted)}.color-grid{display:flex;gap:8px;flex-wrap:wrap}.color-choice{display:flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:8px;padding:3px 8px}.color-choice input{min-height:18px;width:18px}.color-dot{display:inline-block;width:23px;height:18px;border-radius:5px;border:1px solid #73809a66}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:12;display:flex;justify-content:center;box-shadow:0 -5px 18px #202a3d10;padding-bottom:env(safe-area-inset-bottom)}.bottom-nav button{min-width:0;flex:1;max-width:190px;border:none;background:none;font-size:.8rem;color:var(--muted);height:63px;padding:6px 4px;display:grid;place-content:center;gap:1px}.bottom-nav button .symbol{font-size:1.19rem}.bottom-nav button.active{color:var(--blue);font-weight:800;border-top:3px solid var(--blue)}
 #lock-screen{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(150deg,#dce7ff,#f6f8fd 55%,#ecf4ff)}.lock-box{max-width:430px;width:100%;padding:29px;background:white;border:1px solid var(--border);border-radius:19px;box-shadow:0 18px 48px #1b326624}.lock-box h1{font-size:1.5rem;margin:0 0 4px}.lock-box form{display:grid;gap:13px}.lock-box input{font-size:1.25rem;letter-spacing:.3em;text-align:center}.lock-box .warning{font-size:.84rem}
+html.password-picker-hidden #app,html.password-picker-hidden #lock-screen,html.password-picker-hidden #modal-root{visibility:hidden!important}html.password-picker-hidden body{background:#172842!important}
 #modal-root{position:fixed;inset:0;z-index:30;display:none;overflow:auto;background:#14203bb5;padding:12px;align-items:flex-start;justify-content:center}#modal-root.open{display:flex}.modal{position:relative;background:white;border-radius:17px;max-width:750px;width:100%;margin:24px 0 45px;box-shadow:0 22px 70px #07193460;padding:18px 20px 23px}.modal h2{font-size:1.23rem;margin:0}.modal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.modal-body{max-height:none}.modal-close{background:transparent;border:none;font-size:1.5rem;min-height:40px;width:42px;color:var(--muted)}.modal .form-actions{position:sticky;bottom:-23px;background:white;border-top:1px solid var(--border);padding:12px 0 8px;margin-top:16px;z-index:3}.toast{position:fixed;z-index:50;right:18px;top:75px;max-width:min(460px,calc(100% - 36px));background:#172842;color:white;border-radius:11px;padding:12px 16px;box-shadow:0 6px 25px #0003;display:none}.toast.visible{display:block}.chipline{display:flex;flex-wrap:wrap;gap:5px}.split{display:grid;grid-template-columns:1.5fr 1fr;gap:15px}.section-sub{font-size:.83rem;color:var(--muted);margin-top:0}.hidden{display:none!important}footer{max-width:1050px;margin:-75px auto 95px;padding:10px 16px;color:#65738b;font-size:.76rem}
 @media(max-width:800px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.filters input{grid-column:1/-1}.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}
 @media(max-width:550px){main{padding:15px 11px 112px}.grid2,.grid3{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tile{padding:12px}.stat-num{font-size:1.44rem}.modal{padding:13px 13px 20px;margin:5px 0 22px}.modal .form-actions{bottom:-20px}.data-list{grid-template-columns:100px 1fr}.btn{padding:9px 11px}.card-line{padding:12px}.check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}header .head-inner{padding:8px 12px}.bottom-nav button{height:59px;font-size:.72rem}}
@@ -38,8 +39,8 @@ header{background:var(--navy);color:white;position:sticky;top:0;z-index:10;box-s
 <div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
-/* Card Usage Manager / PWA / v0.3.2. Google Drive network access only on explicit backup/restore actions. */
-const APP_VERSION = '0.3.2', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+/* Card Usage Manager / PWA / v0.3.3. Google Drive network access only on explicit backup/restore actions. */
+const APP_VERSION = '0.3.3', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
 const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
 const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
 const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
@@ -803,7 +804,7 @@ async function deleteLocation(id) { const loc = locById(id); if (!loc)
 catch (e) {
     fail(e, '場所の削除');
 } }
-function showModal(title, content) { closeModal(); const modal = h('section', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title }); const head = h('div', { class: 'modal-head' }, h('h2', { text: title }), h('button', { class: 'modal-close', type: 'button', 'aria-label': '閉じる', text: '×', onclick: closeModal })); modal.append(head, h('div', { class: 'modal-body' }, content)); modalRoot.append(modal); modalRoot.classList.add('open'); modalRoot.onclick = e => { if (e.target === modalRoot)
+function showModal(title, content) { closeModal(); const modal = h('section', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': title }); const head = h('div', { class: 'modal-head' }, h('h2', { text: title }), h('button', { class: 'modal-close', type: 'button', 'aria-label': '閉じる', text: '×', onclick: closeModal })); modal.append(head, h('div', { class: 'modal-body' }, content)); modalRoot.append(modal); modalRoot.classList.add('open'); modalRoot.onclick = e => { if (e.target === modalRoot && !$('input[type="password"]', modal))
     closeModal(); }; const first = $('input,select,button', modal); if (first)
     first.focus({ preventScroll: true }); }
 function closeModal() { modalRoot.replaceChildren(); modalRoot.classList.remove('open'); modalRoot.onclick = null; }
@@ -1373,7 +1374,7 @@ function editPin() {
     } });
     showModal('PINを変更', form);
 }
-function lock(reason = 'PINを入力してください') { sessionToken++; unlocked = false; lastActivity = 0; selectedCard = null; closeModal(); main.replaceChildren(); app.hidden = true; lockScreen.hidden = false; renderLock(reason); }
+function lock(reason = 'PINを入力してください') { clearPasswordPickerHold(); sessionToken++; unlocked = false; lastActivity = 0; selectedCard = null; closeModal(); main.replaceChildren(); app.hidden = true; lockScreen.hidden = false; renderLock(reason); }
 function renderLock(reason) {
     lockScreen.replaceChildren();
     clearInterval(lockTicker);
@@ -1465,16 +1466,59 @@ catch (e) {
     showStartupError(e);
 } }
 $('#manual-lock').addEventListener('click', () => lock('手動でロックしました'));
-window.addEventListener('keydown', e => { if (e.key === 'Escape' && unlocked && modalRoot.classList.contains('open'))
-    closeModal(); if (unlocked)
-    lastActivity = Date.now(); });
+// Native password/autofill pickers can briefly hide the document or send Escape.
+// Never dismiss a password dialog based on those browser-owned interactions.
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && unlocked && modalRoot.classList.contains('open') &&
+        !$('input[type="password"]', modalRoot)) closeModal();
+    if (unlocked) lastActivity = Date.now();
+});
 for (const eventType of ['pointerdown', 'input', 'touchstart', 'scroll'])
     document.addEventListener(eventType, () => { if (unlocked)
         lastActivity = Date.now(); }, { passive: true, capture: true });
-document.addEventListener('visibilitychange', () => { if (document.hidden && unlocked)
-    lock('画面が非表示になったためロックしました');
-else if (unlocked && Date.now() - lastActivity >= 300000)
-    lock('5分間操作がなかったためロックしました'); });
+// Ordinary tab switches still lock immediately. Only a focused password field
+// in an open dialog gets a bounded grace period for the browser password picker.
+// During the grace period the whole app is obscured, including its modal.
+const PASSWORD_PICKER_GRACE_MS = 20000;
+let passwordPickerHiddenAt = 0, passwordPickerHoldTimer = null;
+function clearPasswordPickerHold() {
+    if (passwordPickerHoldTimer !== null) clearTimeout(passwordPickerHoldTimer);
+    passwordPickerHoldTimer = null;
+    passwordPickerHiddenAt = 0;
+    document.documentElement.classList.remove('password-picker-hidden');
+}
+function passwordPickerLikely() {
+    const focused = document.activeElement;
+    return unlocked && modalRoot.classList.contains('open') &&
+        focused?.tagName === 'INPUT' && focused.type === 'password' &&
+        modalRoot.contains(focused);
+}
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (!unlocked) return;
+        if (!passwordPickerLikely()) {
+            lock('画面が非表示になったためロックしました');
+            return;
+        }
+        clearPasswordPickerHold();
+        passwordPickerHiddenAt = Date.now();
+        document.documentElement.classList.add('password-picker-hidden');
+        passwordPickerHoldTimer = setTimeout(() => {
+            if (unlocked && document.hidden) lock('画面が非表示になったためロックしました');
+        }, PASSWORD_PICKER_GRACE_MS);
+        return;
+    }
+    if (passwordPickerHiddenAt) {
+        const hiddenDuration = Date.now() - passwordPickerHiddenAt;
+        clearPasswordPickerHold();
+        if (unlocked && (hiddenDuration >= PASSWORD_PICKER_GRACE_MS || Date.now() - lastActivity >= 300000)) {
+            lock('画面が非表示になったためロックしました');
+        } else if (unlocked) lastActivity = Date.now();
+        return;
+    }
+    if (unlocked && Date.now() - lastActivity >= 300000)
+        lock('5分間操作がなかったためロックしました');
+});
 window.addEventListener('pagehide', () => { if (unlocked)
     lock('ページを離れたためロックしました'); });
 window.addEventListener('focus', () => { if (unlocked && Date.now() - lastActivity >= 300000)

@@ -1,4 +1,4 @@
-# カード管理 v0.3.2｜Google Driveアカウント別バックアップ
+# カード管理 v0.3.3｜Google Driveアカウント別バックアップ
 
 ## 仕様
 
@@ -17,7 +17,7 @@
 - Google Cloud Consoleの「承認済みのJavaScript生成元」：`https://goroyattemiyo.github.io`（URLのパスは含めない）、ローカルテストでは `http://localhost:8765`。
 - 利用するGoogle Cloudプロジェクトで**Google Drive APIを有効化**し、OAuthクライアント種別を**ウェブ アプリケーション**にする。
 - **複数の一般ユーザーに使ってもらうには、Google Auth Platform → 対象で「External（外部）」を設定し、Googleの公開ステータスを確認すること**。Testing（テスト）では、許可されたテストユーザーしか利用できない。External / In productionの場合も、Google側のブランド認証・公開審査などが求められることがある。これはアプリのコードとは別のGoogle Cloud設定で、現時点で実際のステータスは未確認。
-- クライアントIDの変更画面は一般利用者には不要なためv0.3.2で撤去。以前にローカル保存した別IDも使用せず、アプリ共通IDを使う。
+- クライアントIDの変更画面は一般利用者には不要なためv0.3.3で撤去。以前にローカル保存した別IDも使用せず、アプリ共通IDを使う。
 
 ## 実機テスト手順（最初は架空のカードのみ）
 
@@ -33,7 +33,7 @@
 | U08 | 認証拒否、権限不足、ネットワーク切断、アカウント識別不能 | 保存・復元せずエラー。既存の端末データは保持される |
 | U09 | 画面ロック、認証ポップアップ中断 | 既存のセッションが失われた場合、安全に中止 |
 | U10 | 従来のローカルJSON書き出し・読み込み | 従来どおり動作する |
-| U11 | PWA再読み込み | バージョン0.3.2、Service Workerキャッシュもv0.3.2 |
+| U11 | PWA再読み込み | バージョン0.3.2、Service Workerキャッシュもv0.3.3 |
 
 ## 注意点
 
@@ -56,3 +56,16 @@
 - [Drive API about.get](https://developers.google.com/workspace/drive/api/reference/rest/v3/about/get)
 - [Drive API権限とdrive.file](https://developers.google.com/workspace/drive/api/guides/api-specific-auth)
 - [OAuthアプリ公開ステータス](https://developers.google.com/identity/protocols/oauth2/production-readiness/overview)
+
+## パスワード管理画面との干渉対策 (v0.3.3)
+- バックアップ用パスフレーズやPIN変更画面で、Chromeなどのパスワード選択UIが一時的にページ非表示を起こしても、20秒以内なら入力ダイアログを維持する。
+- 一時非表示の間はアプリ全体を隠す。20秒以上の非表示・5分間の無操作・ページ移動・パスワード欄以外からの画面切替は従来どおりロックする。
+- パスワード欄を含むダイアログでは、外側クリックやEscapeで閉じず、×またはキャンセルで閉じる。
+- 実ブラウザでのパスワードマネージャー候補選択は端末・ブラウザ実機で要確認。
+
+テスト手順（Node.js 18以上、通信不要）:
+
+```sh
+node tests/password-manager-modal.test.cjs
+node tests/service-worker.test.cjs
+```
