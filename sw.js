@@ -1,10 +1,10 @@
-/* Card Usage Manager / PWA app-shell cache v0.2.0.
+/* Card Usage Manager / PWA app-shell cache v0.2.1.
  * IndexedDBやPIN情報、バックアップはキャッシュしない。
  * バージョン変更時は CACHE_NAME を更新すること。
  */
 'use strict';
 const CACHE_PREFIX = 'credit-card-usage-static-';
-const CACHE_NAME = CACHE_PREFIX + 'v0.2.0';
+const CACHE_NAME = CACHE_PREFIX + 'v0.2.1';
 const APP_FILES = ['index.html', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png'];
 const APP_URLS = APP_FILES.map(path => new URL(path, self.registration.scope).href);
 const ALLOWED_URLS = new Set(APP_URLS);

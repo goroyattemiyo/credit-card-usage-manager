@@ -37,8 +37,8 @@ header{background:var(--navy);color:white;position:sticky;top:0;z-index:10;box-s
 <div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
-/* Card Usage Manager / PWA + Gate 1 MVP / v0.2.0. No external APIs or third-party dependencies. */
-const APP_VERSION = '0.2.0', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+/* Card Usage Manager / PWA + Gate 1 MVP / v0.2.1. No external APIs or third-party dependencies. */
+const APP_VERSION = '0.2.1', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
 const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
 const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
 const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
