@@ -38,8 +38,8 @@ header{background:var(--navy);color:white;position:sticky;top:0;z-index:10;box-s
 <div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
-/* Card Usage Manager / PWA / v0.3.1. Google Drive network access only on explicit backup/restore actions. */
-const APP_VERSION = '0.3.1', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+/* Card Usage Manager / PWA / v0.3.2. Google Drive network access only on explicit backup/restore actions. */
+const APP_VERSION = '0.3.2', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
 const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
 const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
 const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
@@ -916,7 +916,6 @@ function editMigration(id) {
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files';
-const DRIVE_CLIENT_ID_KEY = 'googleDriveOAuthClientId';
 // OAuth client IDs are public identifiers, not client secrets.
 const DRIVE_DEFAULT_CLIENT_ID = '879005049988-4if6tcffre044orcocm1miijjvhtqhre.apps.googleusercontent.com';
 const DRIVE_MARKER = 'ccum-encrypted-backup-v1';
@@ -930,9 +929,8 @@ function checkDriveClientId(value) {
         'Google Cloudの「ウェブ アプリケーション」用OAuthクライアントIDが必要です');
     return value.trim();
 }
-async function getDriveClientId() {
-    const saved = await getKV(DRIVE_CLIENT_ID_KEY);
-    return checkDriveClientId(saved || DRIVE_DEFAULT_CLIENT_ID);
+function getDriveClientId() {
+    return checkDriveClientId(DRIVE_DEFAULT_CLIENT_ID);
 }
 function ensureDriveSdk() {
     assert(driveOriginSupported(), 'Google認証はHTTPSまたはlocalhostの安全な配信環境でのみ使えます（file://は非対応）');
@@ -978,14 +976,17 @@ function requestDriveToken(clientId, epoch) {
                 },
                 error_callback: response => finish(new Error('Google認証を完了できませんでした（ポップアップを確認してください）'))
             });
-            client.requestAccessToken({ prompt: '' });
+            // Googleアカウントは保存・復元操作のたびに明示的に選択する。
+            client.requestAccessToken({ prompt: 'select_account' });
         } catch (err) { finish(err); }
     });
 }
 async function driveFetch(token, url, options = {}) {
     const parsed = new URL(url);
     assert(parsed.origin === 'https://www.googleapis.com' &&
-        (parsed.pathname.startsWith('/drive/v3/files') || parsed.pathname.startsWith('/upload/drive/v3/files')),
+        (parsed.pathname === '/drive/v3/about' ||
+            parsed.pathname === '/drive/v3/files' || parsed.pathname.startsWith('/drive/v3/files/') ||
+            parsed.pathname === '/upload/drive/v3/files' || parsed.pathname.startsWith('/upload/drive/v3/files/')),
         'Google Drive以外の通信先は許可されません');
     const { headers: customHeaders = {}, ...rest } = options;
     let response;
@@ -1008,6 +1009,14 @@ async function driveJSON(response) {
     const obj = await response.json();
     assert(obj && typeof obj === 'object' && !Array.isArray(obj), 'Google Driveの応答形式が不正です');
     return obj;
+}
+// Google Driveの本人情報を最小スコープ drive.file で確認する。メールアドレスは保存しない。
+async function getDriveAccountEmail(token) {
+    const obj = await driveJSON(await driveFetch(token, 'https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)'));
+    const email = obj?.user?.emailAddress;
+    assert(typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+        'Googleアカウントの識別に失敗しました。保存・復元は実行しません');
+    return email;
 }
 function driveBackupFilename() { return `credit-cards-backup-${stampFile()}.json.enc`; }
 function driveBackupMeta(name) {
@@ -1093,35 +1102,11 @@ async function downloadDriveEncrypted(token, id) {
 function renderDriveBackupSection() {
     return h('section', { class: 'panel stack', style: 'margin-top:14px' },
         h('h3', { style: 'margin:0', text: 'Google Driveに暗号化バックアップ' }),
-        h('p', { class: 'sub', text: '任意の手動操作です。通常のカードデータは端末内だけに保存され、DriveへはAES-256-GCMで暗号化したJSONだけを送ります。Googleアカウントの認証は操作時だけ行います。' }),
+        h('p', { class: 'sub', text: '保存・復元時に各自のGoogleアカウントを選択します。選んだアカウントのDriveにだけアクセスします。アプリのクライアントIDを入力する必要はありません。' }),
         h('div', { class: 'btn-row' },
-            btn('Google認証の設定', showDriveSetup),
             btn('暗号化してDriveへ保存', () => showDriveUpload().catch(e => fail(e, 'Drive保存')), 'primary'),
             btn('Driveから復元', () => showDriveRestore().catch(e => fail(e, 'Drive復元')))),
-        h('div', { class: 'fine', text: 'Google OAuthクライアントID（公開識別子）はアプリに既定値として同梱。別IDへの変更も可能です。アクセストークンと暗号化パスフレーズは保存しません。file://ではDrive操作できず、HTTPSまたはlocalhostが必要です。Drive上のファイルは自動削除・上書きしません。' }));
-}
-async function showDriveSetup() {
-    const epoch = sessionToken;
-    try {
-        const oldId = await getKV(DRIVE_CLIENT_ID_KEY) || DRIVE_DEFAULT_CLIENT_ID;
-        assert(unlocked && sessionToken === epoch, 'ロックされたため設定を中止しました');
-        const fieldId = field('Google OAuth 2.0 クライアントID（Webアプリ）',
-            input('text', oldId, { required: true, maxLength: 256, autocomplete: 'off', placeholder: '123...-xxxxx.apps.googleusercontent.com' }));
-        const form = h('form', { class: 'stack' },
-            h('div', { class: 'info', text: '既定のウェブアプリ用OAuthクライアントIDは登録済みです。別のGoogle Cloudプロジェクトに切り替える場合のみ変更してください。クライアントシークレットは入力しません。' }),
-            h('p', { class: 'fine', text: 'この設定はバックアップJSONには含めません。使用する配信元のオリジンをGoogle Cloudの認可済みJavaScript生成元へ追加してください。' }),
-            fieldId, h('div', { class: 'btn-row end' }, btn('キャンセル', closeModal), h('button', { class: 'btn primary', type: 'submit', text: 'IDを端末へ保存' })));
-        form.addEventListener('submit', async e => {
-            e.preventDefault();
-            try {
-                assert(unlocked, 'PIN解除が必要です');
-                const id = checkDriveClientId($('input', fieldId).value);
-                await putKV(DRIVE_CLIENT_ID_KEY, id);
-                closeModal(); toast('OAuthクライアントIDを端末に保存しました');
-            } catch (err) { fail(err, 'Google認証設定'); }
-        });
-        showModal('Google Drive接続の設定', form);
-    } catch (e) { fail(e, 'Google認証設定'); }
+        h('div', { class: 'fine', text: 'Googleに送信するのは暗号化JSONだけ。Googleアクセストークンやパスフレーズは保存しません。Googleアカウントを切り替えても端末内のカード情報は自動的に分かれません。共用端末での利用には注意してください。' }));
 }
 async function showDriveUpload() {
     assert(unlocked, 'PIN解除が必要です');
@@ -1135,7 +1120,7 @@ async function showDriveUpload() {
     const again = field('確認のため再入力',
         input('password', '', { required: true, minLength: 12, maxLength: 256, autocomplete: 'new-password' }));
     const prepare = h('button', { class: 'btn', type: 'submit', text: '暗号化して準備する', disabled: true });
-    const send = btn('Google認証してDriveへ保存', async () => {
+    const send = btn('Googleアカウントを選択してDriveへ保存', async () => {
         if (!sdkReady || !prepared || isBusy) return;
         isBusy = true; send.disabled = true;
         let uploadStarted = false;
@@ -1144,8 +1129,16 @@ async function showDriveUpload() {
             const tokenPromise = requestDriveToken(clientId, epoch);
             const token = await tokenPromise;
             assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため保存を中止しました');
+            const accountEmail = await getDriveAccountEmail(token);
+            assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため保存を中止しました');
             const onDisk = await getKV('dataset');
             assert(onDisk?.revision === prepared.revision, '準備後にカード情報が更新されました。暗号化を最初からやり直してください');
+            if (!confirm(`暗号化バックアップの保存先：\n${accountEmail}\n\nこのGoogleアカウントのDriveへ保存しますか？`)) {
+                state.textContent = '保存先の確認で中止しました。別のアカウントを選ぶ場合は再度Google認証してください。';
+                send.disabled = false;
+                return;
+            }
+            assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため保存を中止しました');
             uploadStarted = true;
             const result = await uploadDriveEncrypted(token, prepared.name, prepared.json);
             // Read back from Drive: a metadata-only success must not be mistaken for a verified backup.
@@ -1153,7 +1146,7 @@ async function showDriveUpload() {
             assert(JSON.stringify(verified, null, 2) === prepared.json, 'Drive上のバックアップの再取得・照合が一致しません。Driveの一覧で状況を確認してください');
             assert(unlocked && sessionToken === epoch, '保存中にロックされました。Drive上の結果を確認してください');
             prepared = null; closeModal();
-            toast('Driveへ暗号化バックアップを保存しました: ' + result.name);
+            toast('Driveへ保存しました（' + accountEmail + '）: ' + result.name);
         } catch (err) {
             state.textContent = uploadStarted
                 ? 'Driveへ保存された可能性があります。重複防止のため再送信を無効にしました。Drive上のバックアップ一覧を確認してください。'
@@ -1165,7 +1158,7 @@ async function showDriveUpload() {
     }, 'primary');
     send.disabled = true;
     const form = h('form', { class: 'stack' },
-        h('div', { class: 'warning', text: 'Googleに渡るのは暗号化済みJSONだけです。PINは含めません。暗号化パスフレーズを失うとGoogleでも復元できません。' }),
+        h('div', { class: 'warning', text: 'Googleに渡るのは暗号化済みJSONだけです。保存先はGoogleアカウント選択後に確認します。共用端末のカード情報はアカウント別に分離されません。' }),
         state, pass, again,
         h('div', { class: 'btn-row end' }, btn('キャンセル', closeModal), prepare, send));
     form.addEventListener('submit', async e => {
@@ -1193,7 +1186,7 @@ async function showDriveUpload() {
     ensureDriveSdk().then(() => {
         if (!unlocked || sessionToken !== epoch || !state.isConnected) return;
         sdkReady = true; prepare.disabled = false;
-        state.textContent = 'Google認証の準備ができました。まず暗号化してください（認証は送信時に行います）。';
+        state.textContent = 'Google認証の準備ができました。まず暗号化してください（送信時に保存先アカウントを選択します）。';
     }).catch(err => { if (state.isConnected) state.textContent = 'Google認証の準備に失敗しました: ' + err.message; });
 }
 async function showDriveRestore() {
@@ -1201,34 +1194,36 @@ async function showDriveRestore() {
     const clientId = await getDriveClientId();
     assert(driveOriginSupported(), 'Google Drive連携はHTTPSまたはlocalhostで開いてください');
     const epoch = sessionToken;
-    let token = null, candidate = null, sdkReady = false, selected = null;
+    let token = null, candidate = null, sdkReady = false, selected = null, accountEmail = null;
     const state = h('div', { class: 'info', text: 'Google認証を準備しています…' });
     const results = h('div', { class: 'stack' });
     const pass = field('選択した暗号化バックアップのパスフレーズ',
         input('password', '', { maxLength: 256, autocomplete: 'off' }));
-    const getList = btn('Google認証してバックアップを表示', async () => {
+    const getList = btn('Googleアカウントを選んでバックアップを表示', async () => {
         if (!sdkReady || isBusy) return;
         isBusy = true; getList.disabled = true;
-        token = null; candidate = null; selected = null; results.replaceChildren(); restore.disabled = true;
+        token = null; candidate = null; selected = null; accountEmail = null; results.replaceChildren(); restore.disabled = true;
         try {
             const nextTokenPromise = requestDriveToken(clientId, epoch);
             token = await nextTokenPromise;
             assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため検索を中止しました');
+            accountEmail = await getDriveAccountEmail(token);
+            assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため検索を中止しました');
             const { items, hasMore } = await listDriveEncrypted(token);
             assert(unlocked && sessionToken === epoch && state.isConnected, '画面が閉じられたかロックされたため検索を中止しました');
-            state.textContent = `${items.length}件の暗号化バックアップが見つかりました。${hasMore ? '最新100件まで表示しています。' : ''}`;
+            state.textContent = `Googleアカウント: ${accountEmail} / 暗号化バックアップ${items.length}件。${hasMore ? '最新100件まで表示しています。' : ''}`;
             if (!items.length) results.append(h('p', { class: 'sub', text: 'このOAuthアプリが作成した暗号化バックアップが見つかりません。別のクライアントIDで作成したファイルは表示されない場合があります。' }));
             for (const item of items) {
                 const choose = btn('選択', () => {
                     selected = item; candidate = null; restore.disabled = true;
                     results.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
                     choose.setAttribute('aria-pressed', 'true');
-                    state.textContent = `選択中: ${item.name}。パスフレーズを入力して「復号・検査」を押してください。`;
+                    state.textContent = `Googleアカウント: ${accountEmail} / 選択中: ${item.name}。パスフレーズを入力して「復号・検査」を押してください。`;
                 }, 'small');
                 results.append(h('div', { class: 'row-between' },
                     h('span', { class: 'fine', text: `${item.name} · ${item.createdTime || '日時不明'} · ${item.size || '?'} bytes` }), choose));
             }
-        } catch (err) { token = null; fail(err, 'Driveバックアップ一覧の取得'); }
+        } catch (err) { token = null; accountEmail = null; fail(err, 'Driveバックアップ一覧の取得'); }
         finally { isBusy = false; getList.disabled = !sdkReady; }
     });
     getList.disabled = true;
@@ -1243,7 +1238,7 @@ async function showDriveRestore() {
             candidate = value;
             $('input', pass).value = '';
             const risks = riskyNumbers(value);
-            state.textContent = `検証済み: ${value.cards.length}枚、サービス${value.services.length}件、移行履歴${value.transfers.length}件。現在のデータはカード${dataset.cards.length}枚です。${risks.length ? '12桁以上の数字列の警告: ' + risks.join('、') : '長い数字列の検出なし'}。復元するとすべて置換し、PINを再設定します。`;
+            state.textContent = `Googleアカウント: ${accountEmail} / 検証済み: ${value.cards.length}枚、サービス${value.services.length}件、移行履歴${value.transfers.length}件。現在のデータはカード${dataset.cards.length}枚です。${risks.length ? '12桁以上の数字列の警告: ' + risks.join('、') : '長い数字列の検出なし'}。復元するとすべて置換し、PINを再設定します。`;
             restore.disabled = false;
         } catch (err) { candidate = null; fail(err, 'Driveバックアップの検証'); }
         finally { isBusy = false; inspect.disabled = false; }
@@ -1251,7 +1246,7 @@ async function showDriveRestore() {
     const restore = btn('最終確認して全件置換・PIN再設定', async () => {
         if (isBusy || !candidate) return;
         if (!confirmRisk(candidate)) return;
-        if (!confirm(`現在のカード${dataset.cards.length}枚・サービス${dataset.services.length}件が全件置換されます。\nPINは削除され再設定が必要です。\n先に現在の端末データをバックアップしましたか？\n\n復元を実行しますか？`)) return;
+        if (!confirm(`復元元Googleアカウント：${accountEmail}\n\n現在のカード${dataset.cards.length}枚・サービス${dataset.services.length}件が全件置換されます。\nPINは削除され再設定が必要です。\n先に現在の端末データをバックアップしましたか？\n\n復元を実行しますか？`)) return;
         isBusy = true; restore.disabled = true;
         try {
             assert(unlocked && sessionToken === epoch, 'ロックされたため復元を中止しました');
@@ -1262,14 +1257,14 @@ async function showDriveRestore() {
     }, 'danger');
     restore.disabled = true;
     const form = h('div', { class: 'stack' },
-        h('div', { class: 'warning', text: 'Driveからの復元では現在の端末データを完全に置換します。最初に現在のバックアップを取ることを推奨します。平文データのDrive保存には対応しません。' }),
+        h('div', { class: 'warning', text: '選択したGoogleアカウントのDriveだけを読み取ります。復元すると端末内の全カードデータを置き換えます。先に現在のバックアップを保存してください。' }),
         state, getList, results, pass, h('div', { class: 'btn-row' }, inspect, restore), btn('キャンセル', closeModal));
     $('input', pass).addEventListener('input', () => { candidate = null; restore.disabled = true; });
     showModal('Driveの暗号化バックアップから復元', form);
     ensureDriveSdk().then(() => {
         if (!unlocked || sessionToken !== epoch || !state.isConnected) return;
         sdkReady = true; getList.disabled = false;
-        state.textContent = 'Google認証の準備ができました。バックアップ一覧の取得はボタン操作時のみ行います。';
+        state.textContent = 'Google認証の準備ができました。ボタンを押して利用するGoogleアカウントを選択してください。';
     }).catch(err => { if (state.isConnected) state.textContent = 'Google認証の準備に失敗しました: ' + err.message; });
 }
 
