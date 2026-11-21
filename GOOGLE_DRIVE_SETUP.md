@@ -1,4 +1,4 @@
-# カード管理 v0.3.0｜Google Drive暗号化バックアップ設定・実機検証
+# カード管理 v0.3.1｜Google Drive暗号化バックアップ設定・実機検証
 
 ## 確定した仕様変更
 - カード情報の主保存先は従来どおり端末内IndexedDB（平文・PINは画面制御のみ）。
@@ -12,9 +12,9 @@
 3. Google Auth Platform（OAuth同意画面）のアプリ名と対象ユーザーを設定。External / テスト運用の場合は本人のGoogleアカウントを**テストユーザー**に追加。個人利用を超える公開はしない。
 4. OAuthクライアントを**ウェブアプリケーション**種別で作成。
 5. 「承認済みのJavaScript生成元」にテスト用 `http://localhost:8765` と `http://localhost` を追加。将来HTTPS配信で使う場合は、そのサイトの正確なオリジン（例：`https://example.com`）も追加する。`file://`、IPの異なるオリジン、任意のPrivate GitHub URLをそのまま登録しても動作しない。
-6. 発行された `......apps.googleusercontent.com` **クライアントIDのみ**をアプリ「設定・データ → Google認証の設定」に入力。**クライアントシークレットは入力・配置しない**。
+6. ウェブ用OAuthクライアントIDはアプリに**既定値として設定済み**。普段はアプリでの手入力は不要。別のGoogle Cloudプロジェクトに切り替えるときだけ「設定・データ → Google認証の設定」で変更する。**クライアントシークレットは入力・配置しない**。
 
-クライアントIDは端末のIndexedDBの設定用キーにのみ保存され、JSONバックアップには含めない。OAuthアクセストークンは操作中のメモリだけで使用し、永続保存しない。
+クライアントIDは公開識別子としてアプリのHTMLに既定値を同梱し、端末側で別IDを上書き設定した場合のみIndexedDBへ保存する。JSONバックアップには含めない。OAuthアクセストークンは操作中のメモリだけで使用し、永続保存しない。
 
 **重要：** Google CloudのOAuth設定や実際のアカウント認証はChatGPT側では完了していません。実ブラウザでの本人操作が必要です。Google認証にはHTTPSまたはlocalhostが必要です。Android/iPhoneへPWAとして導入するための**非公開HTTPS配信方法**は未決定です。GitHub Pages公開は行っていません。
 
@@ -34,7 +34,7 @@ Chromeで `http://localhost:8765/index.html` を開く。ターミナルを閉�
 |---|---|---|
 | U01 | PIN設定、架空カードを登録、画面再読み込み | IndexedDBデータとPINロックが保持される |
 | U02 | ネット切断でアプリを通常操作 | カード一覧・編集は使用可能、Drive操作はエラーになる |
-| U03 | 設定→Google認証設定→OAuthクライアントID登録 | 再表示してもIDが保持される。シークレット入力欄は存在しない |
+| U03 | 設定→Google認証設定→既定OAuthクライアントIDを確認 | 既定IDが表示され、シークレット入力欄は存在しない |
 | U04 | 暗号化してDriveへ保存→パスフレーズ入力→準備→Google認証 | GoogleがDriveファイル権限だけを要求。認証拒否時は未送信 |
 | U05 | Driveアップロード完了 | `.json.enc`が**自分のDrive**に作られる。アプリは再取得一致を検証して完了を表示 |
 | U06 | Google Drive内で保存ファイル確認 | 暗号化ヘッダーとciphertextのみ。カード名・番号・PINハッシュは平文で出ない |
@@ -43,7 +43,7 @@ Chromeで `http://localhost:8765/index.html` を開く。ターミナルを閉�
 | U09 | Google認証拒否、通信遮断、5分ロック | Drive操作は失敗として表示。トークンをIndexedDB/localStorageへ書き込まない |
 | U10 | 同一端末のローカルJSON書き出し・読み込み | 既存ローカルバックアップ機能に回帰がない |
 | U11 | `file://`から開きGoogle Drive操作 | 安全な配信が必要との案内。その他のローカル画面は使える |
-| U12 | PWA更新 | v0.3.0が表示され、Service Workerキャッシュがv0.3.0に更新される |
+| U12 | PWA更新 | v0.3.1が表示され、Service Workerキャッシュがv0.3.1に更新される |
 
 ## 制約・リスク
 - **PINはデータ暗号化ではない。** IndexedDBは平文のまま。Google Driveへ送信するJSONのみ暗号化。
@@ -55,7 +55,7 @@ Chromeで `http://localhost:8765/index.html` を開く。ターミナルを閉�
 - 静的HTML配信のため、Google SDKを読み込む際にはGoogleの認証用JavaScriptが通信される。これはGoogle Drive操作開始時のみ遅延ロードする。
 
 ## 未検証と公開判断
-- OAuthのGoogle実アカウントでの認可：**BLOCKED（クライアントID未提供・本人操作未実施）**。
+- OAuthのGoogle実アカウントでの認可：**未検証（クライアントIDは設定済み。Google Cloudの許可オリジン・テストユーザー登録および本人操作が必要）**。
 - Google Drive APIの実アップロード／復元：**BLOCKED（実Google認証未実施）**。
 - Android/iOSインストール・非公開HTTPS：**未検証／要判断**。
 - ブラウザE2E：実行環境の管理ポリシーでlocalhostへのChromiumナビゲーション不可。**未検証**。

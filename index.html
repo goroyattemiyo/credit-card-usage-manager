@@ -38,8 +38,8 @@ header{background:var(--navy);color:white;position:sticky;top:0;z-index:10;box-s
 <div id="modal-root" role="presentation"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
-/* Card Usage Manager / PWA / v0.3.0. Google Drive network access only on explicit backup/restore actions. */
-const APP_VERSION = '0.3.0', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
+/* Card Usage Manager / PWA / v0.3.1. Google Drive network access only on explicit backup/restore actions. */
+const APP_VERSION = '0.3.1', SCHEMA = 1, DB_NAME = 'credit-card-usage-offline-v1', DB_STORE = 'kv';
 const ENC_FORMAT = 'credit-card-usage-encrypted', PLAIN_FORMAT = 'credit-card-usage-plaintext', KDF_ITERATIONS = 600000, PIN_ITERATIONS = 150000, MAX_FILE_SIZE = 8 * 1024 * 1024;
 const STATUS = { active: '使用中', occasional: 'たまに使用', dormant: '未使用・休眠', considering_cancel: '解約検討中', canceled: '解約済み', reissuing: '再発行中' };
 const BRAND = { visa: 'Visa', mastercard: 'Mastercard', jcb: 'JCB', amex: 'Amex', diners: 'Diners', discover: 'Discover', unionpay: 'UnionPay', other: 'その他' };
@@ -917,6 +917,8 @@ const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files';
 const DRIVE_CLIENT_ID_KEY = 'googleDriveOAuthClientId';
+// OAuth client IDs are public identifiers, not client secrets.
+const DRIVE_DEFAULT_CLIENT_ID = '879005049988-4if6tcffre044orcocm1miijjvhtqhre.apps.googleusercontent.com';
 const DRIVE_MARKER = 'ccum-encrypted-backup-v1';
 let driveSdkPromise = null;
 function driveOriginSupported() {
@@ -930,8 +932,7 @@ function checkDriveClientId(value) {
 }
 async function getDriveClientId() {
     const saved = await getKV(DRIVE_CLIENT_ID_KEY);
-    assert(saved, '先に設定画面でGoogle OAuthクライアントIDを登録してください');
-    return checkDriveClientId(saved);
+    return checkDriveClientId(saved || DRIVE_DEFAULT_CLIENT_ID);
 }
 function ensureDriveSdk() {
     assert(driveOriginSupported(), 'Google認証はHTTPSまたはlocalhostの安全な配信環境でのみ使えます（file://は非対応）');
@@ -1097,17 +1098,17 @@ function renderDriveBackupSection() {
             btn('Google認証の設定', showDriveSetup),
             btn('暗号化してDriveへ保存', () => showDriveUpload().catch(e => fail(e, 'Drive保存')), 'primary'),
             btn('Driveから復元', () => showDriveRestore().catch(e => fail(e, 'Drive復元')))),
-        h('div', { class: 'fine', text: 'Google OAuthクライアントIDは端末内にのみ設定。アクセストークンと暗号化パスフレーズは保存しません。file://ではDrive操作できず、HTTPSまたはlocalhostが必要です。Drive上のファイルは自動削除・上書きしません。' }));
+        h('div', { class: 'fine', text: 'Google OAuthクライアントID（公開識別子）はアプリに既定値として同梱。別IDへの変更も可能です。アクセストークンと暗号化パスフレーズは保存しません。file://ではDrive操作できず、HTTPSまたはlocalhostが必要です。Drive上のファイルは自動削除・上書きしません。' }));
 }
 async function showDriveSetup() {
     const epoch = sessionToken;
     try {
-        const oldId = await getKV(DRIVE_CLIENT_ID_KEY) || '';
+        const oldId = await getKV(DRIVE_CLIENT_ID_KEY) || DRIVE_DEFAULT_CLIENT_ID;
         assert(unlocked && sessionToken === epoch, 'ロックされたため設定を中止しました');
         const fieldId = field('Google OAuth 2.0 クライアントID（Webアプリ）',
             input('text', oldId, { required: true, maxLength: 256, autocomplete: 'off', placeholder: '123...-xxxxx.apps.googleusercontent.com' }));
         const form = h('form', { class: 'stack' },
-            h('div', { class: 'info', text: '個人用Google CloudプロジェクトでDrive APIとOAuth同意画面を有効化し、ウェブアプリ用OAuthクライアントIDを作成してください。クライアントシークレットは入力しません。' }),
+            h('div', { class: 'info', text: '既定のウェブアプリ用OAuthクライアントIDは登録済みです。別のGoogle Cloudプロジェクトに切り替える場合のみ変更してください。クライアントシークレットは入力しません。' }),
             h('p', { class: 'fine', text: 'この設定はバックアップJSONには含めません。使用する配信元のオリジンをGoogle Cloudの認可済みJavaScript生成元へ追加してください。' }),
             fieldId, h('div', { class: 'btn-row end' }, btn('キャンセル', closeModal), h('button', { class: 'btn primary', type: 'submit', text: 'IDを端末へ保存' })));
         form.addEventListener('submit', async e => {
