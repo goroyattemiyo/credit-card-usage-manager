@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>プライバシーポリシー｜カードの使い方管理</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#172842;background:#f5f7fc;line-height:1.75}
+body{margin:0}.wrap{max-width:820px;margin:0 auto;padding:24px 20px 54px}header,main,footer{background:#fff;border:1px solid #dbe4f4;border-radius:16px;padding:20px 24px;margin:14px 0}
+h1{font-size:1.65rem;margin:0 0 8px}h2{font-size:1.12rem;margin:24px 0 8px}p,li{font-size:.98rem}ul{padding-left:1.5rem}a{color:#2752d5}a:hover{text-decoration:none}.note{background:#f1f5ff;border-left:4px solid #315af2;padding:12px 16px;border-radius:8px}.small{font-size:.88rem;color:#53647d}
+</style>
+</head>
+<body><div class="wrap">
+<header>
+<h1>プライバシーポリシー</h1>
+<p>対象アプリ：<strong>カードの使い方管理（カード管理）</strong></p>
+<p class="small">適用日：2026年11月21日</p>
+<p><a href="./">アプリのホームページに戻る</a> · <a href="./terms.html">利用規約</a></p>
+</header>
+<main>
+<p>本アプリは、クレジットカード等の保管場所や紐づくサービスを利用者自身の端末で整理し、必要に応じて自身のGoogle Driveに暗号化バックアップを保存するための静的Webアプリです。</p>
+<section><h2>1. 利用者が入力するデータ</h2>
+<p>カードの名前、保管場所、利用サービス、メモ、移行履歴等のデータは、利用者のブラウザのIndexedDBに保存されます。アプリ運営者が管理する専用サーバーへ自動送信する機能はありません。</p>
+<p class="note"><strong>重要：</strong>端末内のIndexedDBは暗号化されません。4桁PINは画面操作用のロックであり、保存されたデータ自体の暗号化ではありません。カード番号全桁、セキュリティコード、金融機関のパスワード等の機密情報は入力しないでください。</p>
+</section>
+<section><h2>2. Googleアカウント・Google Drive連携</h2>
+<p>利用者が「Driveへ保存」「Driveから復元」を明示的に選択したときだけ、Google Identity Servicesを通じた認証とGoogle Drive APIへの通信を行います。利用者は操作ごとにGoogleアカウントを選択できます。</p>
+<ul>
+<li>使用権限：<code>https://www.googleapis.com/auth/drive.file</code>（アプリが扱うファイルへのアクセス）。</li>
+<li>選択されたGoogleアカウントのメールアドレスは、Drive APIから取得し、保存先や復元元の確認表示に使用します。アプリはこのアドレスを端末へ永続保存しません。</li>
+<li>OAuthアクセストークンは当該操作中にメモリで扱い、IndexedDBやlocalStorageには保存しません。</li>
+<li>Driveへアップロードするバックアップ本文は、利用者のパスフレーズから鍵を導出し、AES-256-GCMで暗号化したJSONです。暗号化にはPBKDF2-HMAC-SHA256（600,000回）を使用します。</li>
+<li>暗号化パスフレーズとPINはバックアップ本文に含めません。Google Drive上では暗号化ファイルの名前、サイズなどのメタデータが扱われます。</li>
+<li>Driveに保存したファイルは、利用者自身のDriveに保持されます。本アプリによる自動同期・定期バックアップ・自動削除は行いません。</li>
+</ul>
+</section>
+<section><h2>3. 外部サービス・通信</h2>
+<p>本サイトはGitHub Pagesで配信されます。サイト配信に必要な通信はGitHubのサービスによって処理されます。Google認証とDrive操作ではGoogleのサービスへ通信します。これらの事業者によるアクセスログ等の取り扱いには各社のポリシーが適用されます。</p>
+<ul><li><a href="https://docs.github.com/ja/site-policy/privacy-policies/github-general-privacy-statement">GitHubのプライバシー情報</a></li><li><a href="https://policies.google.com/privacy?hl=ja">Googleのプライバシーポリシー</a></li></ul>
+<p>本アプリは独自の広告配信、アクセス解析、開発者の収集サーバーへのカード情報送信を実装していません。</p>
+</section>
+<section><h2>4. データの削除とバックアップの管理</h2>
+<p>端末内データはブラウザのサイトデータを削除することで消去できます。ただし削除前に必要なバックアップを取得してください。Google Driveに保存した暗号化ファイルは端末内データの削除と連動して消えません。不要なファイルは利用者自身がGoogle Driveで削除してください。</p>
+<p>バックアップ用パスフレーズを紛失すると、復号・復元できません。別のGoogleアカウントへ切り替えても、同一ブラウザ内のIndexedDBがアカウントごとに自動分離されるわけではありません。共用端末ではブラウザプロフィールを分けてください。</p>
+</section>
+<section><h2>5. お問い合わせ・改定</h2>
+<p>機能やデータ取扱いに関する問い合わせは、公開リポジトリの<a href="https://github.com/goroyattemiyo/credit-card-usage-manager/issues">GitHub Issues</a>をご利用ください。Issuesは一般公開されるため、カード情報、Googleアカウントの認証情報、バックアップ本文、パスフレーズ等を投稿しないでください。</p>
+<p>本ポリシーを変更する場合は、本文と適用日を更新します。</p>
+</section>
+</main>
+<footer><a href="./">カード管理に戻る</a> · <a href="./terms.html">利用規約</a></footer>
+</div></body></html>
