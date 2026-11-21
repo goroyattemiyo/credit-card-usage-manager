@@ -12,8 +12,8 @@ vm.createContext(context);vm.runInContext(src,context);
 const wait=async(event,props={})=>{let p;listeners[event]({...props,waitUntil(x){p=x},respondWith(x){p=x}});return p&&await p};
 (async()=>{
  await wait('install');
- ok(store.has('credit-card-usage-static-v0.3.5'),'new cache');
- ok(store.get('credit-card-usage-static-v0.3.5').size===4,'4 app-shell assets');
+ ok(store.has('credit-card-usage-static-v0.3.6'),'new cache');
+ ok(store.get('credit-card-usage-static-v0.3.6').size===4,'4 app-shell assets');
  ok(skipped,'skipwaiting');
  await wait('activate');
  ok(removed.includes('credit-card-usage-static-v0.3.1'),'removed prior cache');
